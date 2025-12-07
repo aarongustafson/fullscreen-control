@@ -1,6 +1,6 @@
 {
 	"name": "@aarongustafson/fullscreen-control",
-	"version": "1.0.0",
+	"version": "2.0.0",
 	"description": "A web component to add progressively enhance any video or iframe element to have fullscreen capabilities.",
 	"keywords": [
 		"html",

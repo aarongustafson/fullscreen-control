@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>fullscreen-control via esm.sh</title>
+		<style>
+			body {
+				font-family: system-ui, sans-serif;
+				margin: 2rem;
+				line-height: 1.5;
+			}
+
+			video {
+				max-width: 100%;
+				display: block;
+			}
+
+			fullscreen-control {
+				display: inline-block;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>esm.sh CDN sanity check</h1>
+		<p>
+			This page loads the component class from <code>esm.sh</code> and
+			registers it manually.
+		</p>
+
+		<fullscreen-control>
+			<video
+				src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+				width="640"
+				height="360"
+			></video>
+		</fullscreen-control>
+
+		<script type="module">
+			import { FullscreenControlElement } from 'https://esm.sh/@aarongustafson/fullscreen-control@2.0.0/fullscreen-control.js?bundle&target=es2022';
+
+			if (!customElements.get('fullscreen-control')) {
+				customElements.define(
+					'fullscreen-control',
+					FullscreenControlElement,
+				);
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>fullscreen-control via unpkg</title>
+		<style>
+			body {
+				font-family: system-ui, sans-serif;
+				margin: 2rem;
+				line-height: 1.5;
+			}
+
+			iframe {
+				max-width: 100%;
+				display: block;
+			}
+
+			fullscreen-control {
+				display: inline-block;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>unpkg CDN sanity check</h1>
+		<p>
+			This page loads the guarded definition helper from
+			<code>unpkg</code> and registers the element.
+		</p>
+
+		<fullscreen-control button-text="Watch fullscreen">
+			<iframe
+				src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+				width="560"
+				height="315"
+				frameborder="0"
+				title="YouTube video player"
+				allow="
+					accelerometer;
+					autoplay;
+					clipboard-write;
+					encrypted-media;
+					gyroscope;
+					picture-in-picture;
+					web-share;
+				"
+				allowfullscreen
+			></iframe>
+		</fullscreen-control>
+
+		<script type="module">
+			import { defineFullscreenControl } from 'https://unpkg.com/@aarongustafson/fullscreen-control@latest/define.js?module';
+
+			defineFullscreenControl();
+		</script>
+	</body>
+</html>

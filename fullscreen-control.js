@@ -31,7 +31,7 @@ export class FullscreenControlElement extends HTMLElement {
 		style.textContent = `
 			fullscreen-control {
 				position: relative;
-				display: block;
+				display: inline-block;
 			}
 
 			fullscreen-control button {

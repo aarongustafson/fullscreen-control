@@ -1,4 +1,4 @@
-# fullscreen-control Web Component
+# `fullscreen-control` Web Component
 
 [![npm version](https://img.shields.io/npm/v/@aarongustafson/fullscreen-control.svg)](https://www.npmjs.com/package/@aarongustafson/fullscreen-control) [![Build Status](https://img.shields.io/github/actions/workflow/status/aarongustafson/fullscreen-control/ci.yml?branch=main)](https://github.com/aarongustafson/fullscreen-control/actions)
 

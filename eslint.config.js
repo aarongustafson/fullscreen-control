@@ -7,4 +7,16 @@ export default [
 	{
 		ignores: ['node_modules/**', 'coverage/**'],
 	},
+	{
+		files: ['demo/**/*.html'],
+		rules: {
+			// Allow CDN imports in demo files
+			'import-x/no-unresolved': [
+				'error',
+				{
+					ignore: ['^https://'],
+				},
+			],
+		},
+	},
 ];

@@ -1,17 +1,17 @@
 /**
- * ComponentNameElement - COMPONENT_DESCRIPTION
+ * FullscreenControlElement - A web component to add progressively enhance any video or iframe element to have fullscreen capabilities.
  *
- * @element COMPONENT-NAME
+ * @element fullscreen-control
  *
  * @attr {string} example-attribute - Description of the attribute
  *
- * @fires COMPONENT-NAME:event-name - Description of the event
+ * @fires fullscreen-control:event-name - Description of the event
  *
  * @slot - Default slot for content
  *
  * @cssprop --component-name-color - Description of CSS custom property
  */
-export class ComponentNameElement extends HTMLElement {
+export class FullscreenControlElement extends HTMLElement {
 	static get observedAttributes() {
 		return ['example-attribute'];
 	}

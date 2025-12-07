@@ -1,3 +1,3 @@
-import { ComponentNameElement } from './COMPONENT-NAME.js';
+import { FullscreenControlElement } from './fullscreen-control.js';
 
-customElements.define('COMPONENT-NAME', ComponentNameElement);
+customElements.define('fullscreen-control', FullscreenControlElement);

@@ -1,2 +1,2 @@
-export { ComponentNameElement } from './COMPONENT-NAME.js';
+export { FullscreenControlElement } from './fullscreen-control.js';
 import './define.js';

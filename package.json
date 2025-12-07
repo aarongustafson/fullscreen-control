@@ -1,7 +1,7 @@
 {
-	"name": "@aarongustafson/COMPONENT-NAME",
+	"name": "@aarongustafson/fullscreen-control",
 	"version": "0.0.1",
-	"description": "COMPONENT_DESCRIPTION",
+	"description": "A web component to add progressively enhance any video or iframe element to have fullscreen capabilities.",
 	"keywords": [
 		"html",
 		"custom element",
@@ -9,24 +9,24 @@
 	],
 	"author": "Aaron Gustafson <aaron@easy-designs.net> (https://www.aaron-gustafson.com/)",
 	"license": "MIT",
-	"homepage": "https://github.com/aarongustafson/COMPONENT-NAME#readme",
+	"homepage": "https://github.com/aarongustafson/fullscreen-control#readme",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/aarongustafson/COMPONENT-NAME.git"
+		"url": "git+https://github.com/aarongustafson/fullscreen-control.git"
 	},
 	"bugs": {
-		"url": "https://github.com/aarongustafson/COMPONENT-NAME/issues"
+		"url": "https://github.com/aarongustafson/fullscreen-control/issues"
 	},
 	"type": "module",
 	"main": "index.js",
-	"module": "COMPONENT-NAME.js",
+	"module": "fullscreen-control.js",
 	"customElements": "custom-elements.json",
 	"exports": {
 		".": {
 			"import": "./index.js"
 		},
-		"./COMPONENT-NAME.js": {
-			"import": "./COMPONENT-NAME.js"
+		"./fullscreen-control.js": {
+			"import": "./fullscreen-control.js"
 		},
 		"./define.js": {
 			"import": "./define.js"
@@ -34,7 +34,7 @@
 		"./custom-elements.json": "./custom-elements.json"
 	},
 	"files": [
-		"COMPONENT-NAME.js",
+		"fullscreen-control.js",
 		"define.js",
 		"index.js",
 		"custom-elements.json",

@@ -1,20 +1,20 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ComponentNameElement } from '../COMPONENT-NAME.js';
+import { FullscreenControlElement } from '../fullscreen-control.js';
 
-describe('ComponentNameElement', () => {
+describe('FullscreenControlElement', () => {
 	let element;
 
 	beforeEach(() => {
-		element = document.createElement('COMPONENT-NAME');
+		element = document.createElement('fullscreen-control');
 		document.body.appendChild(element);
 	});
 
 	it('should be defined', () => {
-		expect(customElements.get('COMPONENT-NAME')).toBe(ComponentNameElement);
+		expect(customElements.get('fullscreen-control')).toBe(FullscreenControlElement);
 	});
 
 	it('should create an instance', () => {
-		expect(element).toBeInstanceOf(ComponentNameElement);
+		expect(element).toBeInstanceOf(FullscreenControlElement);
 		expect(element).toBeInstanceOf(HTMLElement);
 	});
 

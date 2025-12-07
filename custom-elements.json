@@ -8,11 +8,110 @@
 			"declarations": [
 				{
 					"kind": "class",
-					"description": "A web component to add progressively enhance any video or iframe element to have fullscreen capabilities.",
+					"description": "A web component to progressively enhance any video or iframe element to have fullscreen capabilities.",
 					"name": "FullscreenControlElement",
-					"members": [],
-					"events": [],
-					"attributes": [],
+					"members": [
+						{
+							"kind": "field",
+							"name": "buttonText",
+							"type": {
+								"text": "string"
+							},
+							"description": "The visible text displayed inside the fullscreen button.",
+							"default": "'View fullscreen'"
+						},
+						{
+							"kind": "field",
+							"name": "buttonLabel",
+							"type": {
+								"text": "string"
+							},
+							"description": "Optional aria-label text for the fullscreen button. Falls back to the visible button text when empty.",
+							"default": "''"
+						},
+						{
+							"kind": "method",
+							"name": "enterFullscreen",
+							"return": {
+								"type": {
+									"text": "Promise<void>"
+								}
+							},
+							"description": "Enters fullscreen mode for the component and its contained element."
+						},
+						{
+							"kind": "method",
+							"name": "exitFullscreen",
+							"return": {
+								"type": {
+									"text": "Promise<void>"
+								}
+							},
+							"description": "Exits fullscreen mode."
+						},
+						{
+							"kind": "method",
+							"name": "toggleFullscreen",
+							"return": {
+								"type": {
+									"text": "void"
+								}
+							},
+							"description": "Toggles fullscreen mode on or off."
+						}
+					],
+					"events": [
+						{
+							"name": "fullscreen-control:enter",
+							"type": {
+								"text": "CustomEvent"
+							},
+							"description": "Fired when the element enters fullscreen mode."
+						},
+						{
+							"name": "fullscreen-control:exit",
+							"type": {
+								"text": "CustomEvent"
+							},
+							"description": "Fired when the element exits fullscreen mode."
+						}
+					],
+					"attributes": [
+						{
+							"name": "button-text",
+							"type": {
+								"text": "string"
+							},
+							"description": "Visible text for the fullscreen button. Supports the {name} token to inject the accessible name of the slotted media element.",
+							"default": "'View fullscreen'"
+						},
+						{
+							"name": "button-label",
+							"type": {
+								"text": "string"
+							},
+							"description": "Optional aria-label for the fullscreen button. Supports the {name} token. When omitted, the aria-label matches button-text—use it only when you need different screen-reader wording.",
+							"default": "''"
+						}
+					],
+					"slots": [
+						{
+							"name": "",
+							"description": "Default slot for a video or iframe element to be enhanced with fullscreen capabilities."
+						}
+					],
+					"cssProperties": [
+						{
+							"name": "--fullscreen-control-button-inset-block-start",
+							"description": "Block-start (top) position of the fullscreen button.",
+							"default": "0.5rem"
+						},
+						{
+							"name": "--fullscreen-control-button-inset-inline-end",
+							"description": "Inline-end (right in LTR) position of the fullscreen button.",
+							"default": "0.5rem"
+						}
+					],
 					"superclass": {
 						"name": "HTMLElement"
 					},

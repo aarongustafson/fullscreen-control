@@ -7,13 +7,44 @@
 		<link rel="stylesheet" href="./styles.css" />
 		<style>
 			/* Demo-specific styles */
+			.demo video,
+			.demo iframe {
+				max-width: 100%;
+				display: block;
+			}
+
+			.event-log {
+				margin-block-start: 1rem;
+				padding: 0.75rem;
+				background: Field;
+				color: FieldText;
+				border: 1px solid ButtonBorder;
+				border-radius: 4px;
+				font-family: monospace;
+				font-size: 0.875rem;
+				min-height: 3rem;
+			}
+
+			.event-log p {
+				margin: 0.25rem 0;
+			}
+
+			.event-log p:first-child {
+				font-weight: bold;
+				margin-block-end: 0.5rem;
+			}
+
+			.event-log .event {
+				color: GrayText;
+			}
 		</style>
 	</head>
 	<body>
 		<header>
 			<h1>&lt;fullscreen-control&gt;</h1>
 			<p>
-				A web component to add progressively enhance any video or iframe element to have fullscreen capabilities. See the
+				A web component to progressively enhance any video or iframe
+				element to have fullscreen capabilities. See the
 				<a
 					href="https://github.com/aarongustafson/fullscreen-control/blob/main/README.md"
 					>README</a
@@ -23,42 +54,224 @@
 		</header>
 
 		<main>
-			<!-- Basic Example -->
+			<!-- Video Example -->
 			<section>
-				<h2>Basic Example</h2>
-				<p>A simple demonstration of the component.</p>
+				<h2>Video Example</h2>
+				<p>
+					Wrapping a video element enables fullscreen functionality
+					with a convenient button overlay.
+				</p>
 
 				<div class="demo-section">
-					<h3>Basic Usage</h3>
-					<p>Description of this example.</p>
+					<h3>Basic Video</h3>
+					<p>
+						A simple video element enhanced with fullscreen
+						controls.
+					</p>
 					<div class="code-demo-pair">
 						<pre><code>&lt;fullscreen-control&gt;
-  &lt;p&gt;Content goes here&lt;/p&gt;
+  &lt;video src="video.mp4"&gt;&lt;/video&gt;
 &lt;/fullscreen-control&gt;</code></pre>
 						<div class="demo">
 							<fullscreen-control>
-								<p>Content goes here</p>
+								<video
+									src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+									width="640"
+									height="360"
+								></video>
 							</fullscreen-control>
 						</div>
 					</div>
 				</div>
 			</section>
 
-			<!-- Example with Attributes -->
+			<!-- Iframe Example -->
 			<section>
-				<h2>Example with Attributes</h2>
-				<p>Demonstrating component attributes.</p>
+				<h2>Iframe Example</h2>
+				<p>
+					Wrapping an iframe (like YouTube videos) enables fullscreen
+					mode.
+				</p>
 
 				<div class="demo-section">
-					<h3>Using Attributes</h3>
-					<p>Description of this example with attributes.</p>
+					<h3>YouTube Embed</h3>
+					<p>An embedded YouTube video with fullscreen capability.</p>
 					<div class="code-demo-pair">
-						<pre><code>&lt;fullscreen-control example-attribute="value"&gt;
-  &lt;p&gt;Content with attributes&lt;/p&gt;
+						<pre><code>&lt;fullscreen-control&gt;
+  &lt;iframe
+    src="https://www.youtube.com/embed/..."
+    width="560"
+    height="315"
+  &gt;&lt;/iframe&gt;
 &lt;/fullscreen-control&gt;</code></pre>
 						<div class="demo">
-							<fullscreen-control example-attribute="value">
-								<p>Content with attributes</p>
+							<fullscreen-control>
+								<iframe
+									src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+									width="560"
+									height="315"
+									frameborder="0"
+									aria-label="YouTube video player"
+								></iframe>
+							</fullscreen-control>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- Custom Label -->
+			<section>
+				<h2>Custom Button Text &amp; Label</h2>
+				<p>
+					Use <code>button-text</code> to adjust the visible button
+					copy and optionally provide a distinct accessible name with
+					<code>button-label</code>. Both attributes support the
+					<code>{name}</code> token, which is replaced with the
+					media's accessible name when available. Only add
+					<code>button-label</code> when you need screen readers to
+					hear something different than the visible text; otherwise
+					leave it off and it will mirror
+					<code>button-text</code> automatically.
+				</p>
+
+				<div class="demo-section">
+					<h3>Japanese Translation</h3>
+					<p>
+						Localized button text. The aria-label falls back to this
+						fullscreen button. Supports <code>{name}</code>. Falling
+						back to <code>button-text</code> when omitted, so
+						reserve it for cases where the accessible announcement
+						should differ from the visible text.
+					</p>
+
+					<div class="code-demo-pair">
+						<pre><code>&lt;fullscreen-control button-text="全画面表示"&gt;
+  &lt;video src="video.mp4"&gt;&lt;/video&gt;
+&lt;/fullscreen-control&gt;</code></pre>
+						<div class="demo">
+							<fullscreen-control button-text="全画面表示">
+								<video
+									src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+									width="640"
+									height="360"
+								></video>
+							</fullscreen-control>
+						</div>
+					</div>
+				</div>
+
+				<div class="demo-section">
+					<h3>Accessible Name Injection</h3>
+					<p>
+						Using <code>{name}</code> automatically pulls the
+						media's accessible name into the button text and label.
+					</p>
+					<div class="code-demo-pair">
+						<pre><code>&lt;fullscreen-control
+  button-text="View {name} fullscreen"
+  button-label="Enter fullscreen for {name}"
+&gt;
+  &lt;video src="video.mp4" aria-label="Product demo"&gt;&lt;/video&gt;
+&lt;/fullscreen-control&gt;</code></pre>
+						<div class="demo">
+							<fullscreen-control
+								button-text="View {name} fullscreen"
+								button-label="Enter fullscreen for {name}"
+							>
+								<video
+									src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+									width="640"
+									height="360"
+									aria-label="Product demo"
+								></video>
+							</fullscreen-control>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- Events -->
+			<section>
+				<h2>Events</h2>
+				<p>
+					The component fires custom events when entering and exiting
+					fullscreen mode.
+				</p>
+
+				<div class="demo-section">
+					<h3>Listening to Events</h3>
+					<p>
+						Try entering and exiting fullscreen to see the events
+						logged below.
+					</p>
+					<div class="code-demo-pair">
+						<pre><code>&lt;fullscreen-control id="event-demo"&gt;
+  &lt;video src="video.mp4"&gt;&lt;/video&gt;
+&lt;/fullscreen-control&gt;
+
+&lt;script&gt;
+  const element = document.querySelector('#event-demo');
+  element.addEventListener('fullscreen-control:enter', (e) =&gt; {
+    console.log('Entered fullscreen');
+  });
+  element.addEventListener('fullscreen-control:exit', (e) =&gt; {
+    console.log('Exited fullscreen');
+  });
+&lt;/script&gt;</code></pre>
+						<div class="demo">
+							<fullscreen-control id="event-demo">
+								<video
+									src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
+									width="640"
+									height="360"
+								></video>
+							</fullscreen-control>
+							<div class="event-log">
+								<p>Event Log:</p>
+								<div id="event-log-content"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- Styling -->
+			<section>
+				<h2>Custom Styling</h2>
+				<p>
+					Since the component uses light DOM, you can style the button
+					directly with CSS. You can also use CSS custom properties to
+					adjust the button position.
+				</p>
+
+				<div class="demo-section">
+					<h3>Custom Button Style</h3>
+					<p>Styling the fullscreen button directly with CSS.</p>
+					<div class="code-demo-pair">
+						<pre><code>&lt;style&gt;
+  .custom-style button {
+    background: #c35050;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 20px;
+    font-weight: bold;
+  }
+  .custom-style button:hover {
+    background: #ff5252;
+  }
+&lt;/style&gt;
+
+&lt;fullscreen-control class="custom-style"&gt;
+  &lt;video src="video.mp4"&gt;&lt;/video&gt;
+&lt;/fullscreen-control&gt;</code></pre>
+						<div class="demo">
+							<fullscreen-control class="custom-style">
+								<video
+									src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+									width="640"
+									height="360"
+								></video>
 							</fullscreen-control>
 						</div>
 					</div>
@@ -68,9 +281,83 @@
 			<!-- API Reference -->
 			<section class="api-reference">
 				<h2>API Reference</h2>
+
+				<h3>Accessibility</h3>
 				<p>
-					For complete documentation of attributes, events, and
-					browser support, see the
+					The component automatically manages focus for keyboard
+					accessibility. When the fullscreen button is clicked to
+					enter fullscreen mode, focus will automatically return to
+					the button after exiting fullscreen, ensuring a seamless
+					keyboard navigation experience.
+				</p>
+
+				<h3>Attributes</h3>
+				<ul>
+					<li>
+						<code>button-text</code> - Visible text for the
+						fullscreen button (default: "View fullscreen"). Supports
+						the <code>{name}</code> token to inject the media's
+						accessible name.
+					</li>
+					<li>
+						<code>button-label</code> - Optional
+						<code>aria-label</code> for the fullscreen button.
+						Supports <code>{name}</code>. Falling back to
+						<code>button-text</code> when omitted.
+					</li>
+				</ul>
+
+				<h3>Events</h3>
+				<ul>
+					<li>
+						<code>fullscreen-control:enter</code> - Fired when
+						entering fullscreen mode
+					</li>
+					<li>
+						<code>fullscreen-control:exit</code> - Fired when
+						exiting fullscreen mode
+					</li>
+				</ul>
+
+				<h3>CSS Custom Properties</h3>
+				<ul>
+					<li>
+						<code
+							>--fullscreen-control-button-inset-block-start</code
+						>
+						- Top position (default: 0.5rem)
+					</li>
+					<li>
+						<code
+							>--fullscreen-control-button-inset-inline-end</code
+						>
+						- Right position (default: 0.5rem)
+					</li>
+				</ul>
+
+				<h3>Direct Styling</h3>
+				<p>
+					Since the component uses light DOM, you can also style the
+					button element directly using standard CSS selectors like
+					<code>fullscreen-control button</code>.
+				</p>
+
+				<h3>Methods</h3>
+				<ul>
+					<li>
+						<code>enterFullscreen()</code> - Enter fullscreen mode
+					</li>
+					<li>
+						<code>exitFullscreen()</code> - Exit fullscreen mode
+					</li>
+					<li>
+						<code>toggleFullscreen()</code> - Toggle fullscreen mode
+					</li>
+				</ul>
+
+				<p>
+					For complete documentation and browser support information,
+					see the
 					<a
 						href="https://github.com/aarongustafson/fullscreen-control/blob/main/README.md"
 						>README</a
@@ -90,6 +377,44 @@
 			</p>
 		</footer>
 
+		<style>
+			.custom-style button {
+				background: #ff6b6b;
+				color: white;
+				border: none;
+				padding: 0.75rem 1.5rem;
+				border-radius: 20px;
+				font-weight: bold;
+			}
+			.custom-style button:hover {
+				background: #ff5252;
+			}
+		</style>
+
 		<script src="../define.js" type="module"></script>
+		<script type="module">
+			// Event logging demo
+			const eventDemo = document.getElementById('event-demo');
+			const eventLogContent =
+				document.getElementById('event-log-content');
+
+			if (eventDemo && eventLogContent) {
+				eventDemo.addEventListener('fullscreen-control:enter', (e) => {
+					const timestamp = new Date().toLocaleTimeString();
+					const log = document.createElement('p');
+					log.className = 'event';
+					log.textContent = `[${timestamp}] fullscreen-control:enter`;
+					eventLogContent.appendChild(log);
+				});
+
+				eventDemo.addEventListener('fullscreen-control:exit', (e) => {
+					const timestamp = new Date().toLocaleTimeString();
+					const log = document.createElement('p');
+					log.className = 'event';
+					log.textContent = `[${timestamp}] fullscreen-control:exit`;
+					eventLogContent.appendChild(log);
+				});
+			}
+		</script>
 	</body>
 </html>

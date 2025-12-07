@@ -16,28 +16,36 @@ npm install @aarongustafson/fullscreen-control
 
 ## Usage
 
-### Option 1: Auto-define the custom element (easiest)
-
-Import the package to automatically define the `<fullscreen-control>` custom element:
-
-```javascript
-import '@aarongustafson/fullscreen-control';
-```
-
-Or use the define-only script in HTML:
-
-```html
-<script src="./node_modules/@aarongustafson/fullscreen-control/define.js" type="module"></script>
-```
-
-### Option 2: Import the class and define manually
+### Option 1: Import the class and define manually
 
 Import the class and define the custom element with your preferred tag name:
 
 ```javascript
-import { FullscreenControlElement } from '@aarongustafson/fullscreen-control/fullscreen-control.js';
+import { FullscreenControlElement } from '@aarongustafson/fullscreen-control';
 
 customElements.define('my-custom-name', FullscreenControlElement);
+```
+
+### Option 2: Auto-define the custom element (browser environments only)
+
+Use the guarded definition helper to register the element when `customElements` is available:
+
+```javascript
+import '@aarongustafson/fullscreen-control/define.js';
+```
+
+If you prefer to control when the element is registered, call the helper directly:
+
+```javascript
+import { defineFullscreenControl } from '@aarongustafson/fullscreen-control/define.js';
+
+defineFullscreenControl();
+```
+
+You can also include the guarded script from HTML:
+
+```html
+<script src="./node_modules/@aarongustafson/fullscreen-control/define.js" type="module"></script>
 ```
 
 ### Basic Example

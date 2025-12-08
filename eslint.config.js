@@ -5,7 +5,7 @@ export default [
 	...eslintConfig,
 	eslintConfigPrettier,
 	{
-		ignores: ['node_modules/**', 'coverage/**'],
+		ignores: ['node_modules/**', 'coverage/**', 'demo/**'],
 	},
 	{
 		files: ['demo/**/*.html'],

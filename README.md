@@ -6,7 +6,9 @@ A web component to progressively enhance any video or iframe element with fullsc
 
 ## Demo
 
-[Live Demo](https://aarongustafson.github.io/fullscreen-control/demo/) ([Source](./demo/index.html))
+- [Live Demo](https://aarongustafson.github.io/fullscreen-control/demo/) ([Source](./demo/index.html))
+- [esm.sh CDN Demo](https://aarongustafson.github.io/fullscreen-control/demo/esm) ([Source](./demo/esm.html))
+- [unpkg CDN Demo](https://aarongustafson.github.io/fullscreen-control/demo/unpkg) ([Source](./demo/unpkg.html))
 
 ## Installation
 

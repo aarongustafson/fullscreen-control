@@ -71,6 +71,7 @@ export class FullscreenControlElement extends HTMLElement {
 		this._pendingButtonUpdate = null;
 		this._pendingButtonUpdateUsesTimeout = false;
 		this._fullscreenChangeAbortController = null;
+		this._isFullscreenActive = false;
 		this._handleEscape = this._handleEscape.bind(this);
 		this._handleFullscreenChange = this._handleFullscreenChange.bind(this);
 		this._handleButtonClick = this._handleButtonClick.bind(this);
@@ -200,6 +201,7 @@ export class FullscreenControlElement extends HTMLElement {
 		this._target = null;
 		this._targetId = null;
 		this._shouldReturnFocus = false;
+		this._isFullscreenActive = false;
 	}
 
 	_enhanceTarget() {
@@ -243,12 +245,19 @@ export class FullscreenControlElement extends HTMLElement {
 	}
 
 	_handleFullscreenChange() {
-		if (this._isFullscreen()) {
+		const isFullscreen = this._isFullscreen();
+		if (isFullscreen) {
 			// Listen for escape key when in fullscreen
 			document.addEventListener('keydown', this._handleEscape);
+			if (!this._isFullscreenActive) {
+				this._dispatchFullscreenEvent('enter');
+			}
 		} else {
 			// Remove escape listener when not in fullscreen
 			document.removeEventListener('keydown', this._handleEscape);
+			if (this._isFullscreenActive) {
+				this._dispatchFullscreenEvent('exit');
+			}
 
 			// Return focus to button if it triggered fullscreen
 			if (this._shouldReturnFocus && this._button) {
@@ -256,6 +265,7 @@ export class FullscreenControlElement extends HTMLElement {
 				this._shouldReturnFocus = false;
 			}
 		}
+		this._isFullscreenActive = isFullscreen;
 	}
 
 	_scheduleSetup() {
@@ -561,6 +571,15 @@ export class FullscreenControlElement extends HTMLElement {
 		}
 	}
 
+	_dispatchFullscreenEvent(type) {
+		this.dispatchEvent(
+			new CustomEvent(`fullscreen-control:${type}`, {
+				bubbles: true,
+				composed: true,
+			}),
+		);
+	}
+
 	_isFullscreen() {
 		return (
 			document.fullscreenElement === this._target ||
@@ -592,15 +611,6 @@ export class FullscreenControlElement extends HTMLElement {
 				await this._target.mozRequestFullScreen();
 				didEnter = true;
 			}
-
-			if (didEnter) {
-				this.dispatchEvent(
-					new CustomEvent('fullscreen-control:enter', {
-						bubbles: true,
-						composed: true,
-					}),
-				);
-			}
 		} catch (error) {
 			console.error('Error entering fullscreen:', error);
 		}
@@ -611,25 +621,12 @@ export class FullscreenControlElement extends HTMLElement {
 	 */
 	async exitFullscreen() {
 		try {
-			let didExit = false;
 			if (document.exitFullscreen) {
 				await document.exitFullscreen();
-				didExit = true;
 			} else if (document.webkitExitFullscreen) {
 				await document.webkitExitFullscreen();
-				didExit = true;
 			} else if (document.mozCancelFullScreen) {
 				await document.mozCancelFullScreen();
-				didExit = true;
-			}
-
-			if (didExit) {
-				this.dispatchEvent(
-					new CustomEvent('fullscreen-control:exit', {
-						bubbles: true,
-						composed: true,
-					}),
-				);
 			}
 		} catch (error) {
 			console.error('Error exiting fullscreen:', error);

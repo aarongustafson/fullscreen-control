@@ -580,6 +580,7 @@ describe('FullscreenControlElement', () => {
 			const video = document.createElement('video');
 			element.appendChild(video);
 			await reconnectElement();
+			setFullscreenElement(element._target);
 			const consoleErrorSpy = vi
 				.spyOn(console, 'error')
 				.mockImplementation(() => {});
@@ -593,6 +594,7 @@ describe('FullscreenControlElement', () => {
 				error,
 			);
 			consoleErrorSpy.mockRestore();
+			setFullscreenElement(null);
 		});
 	});
 
@@ -633,6 +635,7 @@ describe('FullscreenControlElement', () => {
 			const video = document.createElement('video');
 			element.appendChild(video);
 			await reconnectElement();
+			setFullscreenElement(element._target);
 			delete document.exitFullscreen;
 			const webkitExitFullscreenSpy = vi
 				.fn()
@@ -643,12 +646,14 @@ describe('FullscreenControlElement', () => {
 
 			expect(webkitExitFullscreenSpy).toHaveBeenCalled();
 			delete document.webkitExitFullscreen;
+			setFullscreenElement(null);
 		});
 
 		it('should handle moz prefix for exitFullscreen', async () => {
 			const video = document.createElement('video');
 			element.appendChild(video);
 			await reconnectElement();
+			setFullscreenElement(element._target);
 			delete document.exitFullscreen;
 			delete document.webkitExitFullscreen;
 			const mozCancelFullScreenSpy = vi.fn().mockResolvedValue(undefined);
@@ -658,6 +663,7 @@ describe('FullscreenControlElement', () => {
 
 			expect(mozCancelFullScreenSpy).toHaveBeenCalled();
 			delete document.mozCancelFullScreen;
+			setFullscreenElement(null);
 		});
 	});
 

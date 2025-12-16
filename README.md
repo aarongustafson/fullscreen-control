@@ -66,11 +66,17 @@ Or with an iframe:
 </fullscreen-control>
 ```
 
+## TypeScript
+
+This package ships bundled TypeScript definitions. Importing either `@aarongustafson/fullscreen-control` or `@aarongustafson/fullscreen-control/fullscreen-control.js` provides typed access to `FullscreenControlElement` along with its `fullscreen-control:enter` and `fullscreen-control:exit` events.
+
 ## Accessibility
 
 The component automatically manages focus for keyboard accessibility. When the fullscreen button is clicked to enter fullscreen mode, focus will automatically return to the button after exiting fullscreen, ensuring a seamless keyboard navigation experience. The control also links the button to the wrapped media via `aria-controls`, generating a unique `id` for the slotted element when it does not already have one.
 
 Both `button-text` and `button-label` support the `{name}` placeholder. If the slotted video or iframe has an accessible name (via `aria-label`, `title`, or other native naming), `{name}` will be replaced with that value; otherwise it resolves to an empty string.
+
+Changes to the slotted media's accessible name or `id` are observed automatically, ensuring the visible button text and its `aria-controls` attribute remain in sync even when those attributes are updated dynamically.
 
 ## Attributes
 

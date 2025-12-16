@@ -620,6 +620,9 @@ export class FullscreenControlElement extends HTMLElement {
 	 * Exit fullscreen mode
 	 */
 	async exitFullscreen() {
+		if (!this._isFullscreen()) {
+			return;
+		}
 		try {
 			if (document.exitFullscreen) {
 				await document.exitFullscreen();

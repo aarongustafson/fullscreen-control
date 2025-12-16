@@ -18,6 +18,14 @@ const waitForComponent = () =>
 		}, 0);
 	});
 
+const setFullscreenElement = (value) => {
+	Object.defineProperty(document, 'fullscreenElement', {
+		configurable: true,
+		writable: true,
+		value,
+	});
+};
+
 const originalDocumentApis = {
 	exitFullscreen: document.exitFullscreen,
 	webkitExitFullscreen: document.webkitExitFullscreen,
@@ -53,6 +61,7 @@ describe('FullscreenControlElement', () => {
 		document.webkitExitFullscreen =
 			originalDocumentApis.webkitExitFullscreen;
 		document.mozCancelFullScreen = originalDocumentApis.mozCancelFullScreen;
+		setFullscreenElement(null);
 	});
 
 	it('should be defined', () => {
@@ -449,6 +458,8 @@ describe('FullscreenControlElement', () => {
 				.fn()
 				.mockResolvedValue(undefined);
 			await element.enterFullscreen();
+			setFullscreenElement(element._target);
+			document.dispatchEvent(new Event('fullscreenchange'));
 
 			expect(eventSpy).toHaveBeenCalled();
 		});
@@ -458,7 +469,25 @@ describe('FullscreenControlElement', () => {
 			element.addEventListener('fullscreen-control:exit', eventSpy);
 
 			document.exitFullscreen = vi.fn().mockResolvedValue(undefined);
+			setFullscreenElement(element._target);
+			document.dispatchEvent(new Event('fullscreenchange'));
+
 			await element.exitFullscreen();
+			setFullscreenElement(null);
+			document.dispatchEvent(new Event('fullscreenchange'));
+
+			expect(eventSpy).toHaveBeenCalled();
+		});
+
+		it('should dispatch exit event when fullscreen exits externally', async () => {
+			const eventSpy = vi.fn();
+			element.addEventListener('fullscreen-control:exit', eventSpy);
+
+			setFullscreenElement(element._target);
+			document.dispatchEvent(new Event('fullscreenchange'));
+
+			setFullscreenElement(null);
+			document.dispatchEvent(new Event('fullscreenchange'));
 
 			expect(eventSpy).toHaveBeenCalled();
 		});

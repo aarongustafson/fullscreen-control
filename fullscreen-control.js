@@ -14,24 +14,28 @@
  * @cssprop --fullscreen-control-button-inset-block-start - Block-start position of the button (default: 0.5rem)
  * @cssprop --fullscreen-control-button-inset-inline-end - Inline-end position of the button (default: 0.5rem)
  */
+const DEFAULT_BUTTON_TEXT = 'View fullscreen';
+const STYLE_ELEMENT_ID = 'fullscreen-control-styles';
 export class FullscreenControlElement extends HTMLElement {
 	static get observedAttributes() {
 		return ['button-text', 'button-label'];
 	}
 
 	static _injectStyles() {
-		// Check if styles are already injected
-		const styleId = 'fullscreen-control-styles';
-		if (document.getElementById(styleId)) {
+		if (document.getElementById(STYLE_ELEMENT_ID)) {
 			return;
 		}
 
 		const style = document.createElement('style');
-		style.id = styleId;
+		style.id = STYLE_ELEMENT_ID;
 		style.textContent = `
 			fullscreen-control {
 				position: relative;
 				display: inline-block;
+			}
+
+			fullscreen-control[hidden] {
+				display: none !important;
 			}
 
 			fullscreen-control button {
@@ -48,39 +52,67 @@ export class FullscreenControlElement extends HTMLElement {
 
 	constructor() {
 		super();
+		this._internals =
+			typeof this.attachInternals === 'function'
+				? this.attachInternals()
+				: null;
 		this._button = null;
-		this._container = null;
 		this._target = null;
 		this._targetId = null;
 		this._shouldReturnFocus = false;
+		this._isObservingFullscreen = false;
+		this._mutationObserver = null;
+		this._targetObserver = null;
+		this._patchedTarget = null;
+		this._originalTargetSetAttribute = null;
+		this._originalTargetRemoveAttribute = null;
+		this._pendingInitFrame = null;
+		this._pendingInitUsesTimeout = false;
+		this._pendingButtonUpdate = null;
+		this._pendingButtonUpdateUsesTimeout = false;
+		this._fullscreenChangeAbortController = null;
 		this._handleEscape = this._handleEscape.bind(this);
 		this._handleFullscreenChange = this._handleFullscreenChange.bind(this);
+		this._handleButtonClick = this._handleButtonClick.bind(this);
 	}
 
 	connectedCallback() {
-		this._setup();
+		this._upgradeProperty('buttonText');
+		this._upgradeProperty('buttonLabel');
+		this._ensureHostAttributes();
+		this._setupMutationObserver();
+		this._scheduleSetup();
 	}
 
 	disconnectedCallback() {
+		this._cancelScheduledSetup();
+		this._teardownMutationObserver();
 		this._cleanup();
 	}
 
 	attributeChangedCallback(name, oldValue, newValue) {
-		if (
-			(name === 'button-text' || name === 'button-label') &&
-			oldValue !== newValue &&
-			this._button
-		) {
-			this._updateButtonText();
+		if (oldValue === newValue) {
+			return;
+		}
+
+		switch (name) {
+			case 'button-text':
+			case 'button-label':
+				if (this._button) {
+					this._updateButtonText();
+				}
+				break;
+			default:
+				break;
 		}
 	}
 
 	get buttonText() {
-		return this.getAttribute('button-text') || 'View fullscreen';
+		return this.getAttribute('button-text') || DEFAULT_BUTTON_TEXT;
 	}
 
 	set buttonText(value) {
-		this.setAttribute('button-text', value);
+		this._reflectStringAttribute('button-text', value);
 	}
 
 	get buttonLabel() {
@@ -88,7 +120,7 @@ export class FullscreenControlElement extends HTMLElement {
 	}
 
 	set buttonLabel(value) {
-		this.setAttribute('button-label', value);
+		this._reflectStringAttribute('button-label', value);
 	}
 
 	_getTargetName() {
@@ -130,43 +162,40 @@ export class FullscreenControlElement extends HTMLElement {
 	}
 
 	_setup() {
-		// Find the video or iframe element
 		this._target = this.querySelector('video, iframe');
-
 		if (!this._target) {
 			console.warn(
 				'fullscreen-control: No video or iframe element found',
 			);
-			return;
+			return false;
 		}
 
 		this._targetId = this._ensureTargetId();
-
-		// Enhance the target to allow fullscreen
 		this._enhanceTarget();
-
-		// Inject styles
 		FullscreenControlElement._injectStyles();
-
-		// Create and insert the fullscreen button
 		this._createButton();
-
-		// Listen for fullscreen changes
-		document.addEventListener(
-			'fullscreenchange',
-			this._handleFullscreenChange,
-		);
+		this._observeTargetAttributes();
+		this._startFullscreenObserver();
+		return true;
 	}
 
 	_cleanup() {
+		if (this._internals?.states) {
+			this._internals.states.remove('rendered');
+		}
+		this._cancelQueuedButtonTextUpdate();
 		if (this._button) {
 			this._button.removeEventListener('click', this._handleButtonClick);
+			this._button.remove();
+			this._button = null;
 		}
 		document.removeEventListener('keydown', this._handleEscape);
-		document.removeEventListener(
-			'fullscreenchange',
-			this._handleFullscreenChange,
-		);
+		this._stopFullscreenObserver();
+		this._disconnectTargetObserver();
+		this._restoreTargetAttributePatchedMethods();
+		this._target = null;
+		this._targetId = null;
+		this._shouldReturnFocus = false;
 	}
 
 	_enhanceTarget() {
@@ -189,13 +218,9 @@ export class FullscreenControlElement extends HTMLElement {
 	_createButton() {
 		this._button = document.createElement('button');
 		this._button.setAttribute('type', 'button');
-		if (this._targetId) {
-			this._button.setAttribute('aria-controls', this._targetId);
-		}
+		this._syncButtonControlAssociation();
 
 		this._updateButtonText();
-
-		this._handleButtonClick = this._handleButtonClick.bind(this);
 		this._button.addEventListener('click', this._handleButtonClick);
 
 		this.appendChild(this._button);
@@ -229,6 +254,309 @@ export class FullscreenControlElement extends HTMLElement {
 		}
 	}
 
+	_scheduleSetup() {
+		if (!this.isConnected) {
+			return;
+		}
+
+		this._cancelScheduledSetup();
+
+		if (typeof requestAnimationFrame === 'function') {
+			this._pendingInitUsesTimeout = false;
+			this._pendingInitFrame = requestAnimationFrame(() => {
+				this._pendingInitFrame = null;
+				this._pendingInitUsesTimeout = false;
+				this._initialize();
+			});
+			return;
+		}
+
+		this._pendingInitUsesTimeout = true;
+		this._pendingInitFrame = setTimeout(() => {
+			this._pendingInitFrame = null;
+			this._pendingInitUsesTimeout = false;
+			this._initialize();
+		}, 0);
+	}
+
+	_cancelScheduledSetup() {
+		if (this._pendingInitFrame === null) {
+			return;
+		}
+
+		if (this._pendingInitUsesTimeout) {
+			clearTimeout(this._pendingInitFrame);
+		} else if (typeof cancelAnimationFrame === 'function') {
+			cancelAnimationFrame(this._pendingInitFrame);
+		} else {
+			clearTimeout(this._pendingInitFrame);
+		}
+
+		this._pendingInitFrame = null;
+		this._pendingInitUsesTimeout = false;
+	}
+
+	_initialize() {
+		this._cleanup();
+		const didSetup = this._setup();
+		if (didSetup && this._internals?.states) {
+			this._internals.states.add('rendered');
+		}
+	}
+
+	_ensureHostAttributes() {
+		if (!this.hasAttribute('role')) {
+			this.setAttribute('role', 'group');
+		}
+	}
+
+	_setupMutationObserver() {
+		if (this._mutationObserver || typeof MutationObserver !== 'function') {
+			return;
+		}
+
+		this._mutationObserver = new MutationObserver((mutations) => {
+			for (const mutation of mutations) {
+				if (mutation.type !== 'childList') {
+					continue;
+				}
+				const relatedNodes = [
+					...mutation.addedNodes,
+					...mutation.removedNodes,
+				];
+				if (
+					relatedNodes.some((node) =>
+						FullscreenControlElement._mutationTouchesMedia(node),
+					)
+				) {
+					this._scheduleSetup();
+					break;
+				}
+			}
+		});
+
+		this._mutationObserver.observe(this, {
+			childList: true,
+			subtree: false,
+		});
+	}
+
+	_teardownMutationObserver() {
+		if (this._mutationObserver) {
+			this._mutationObserver.disconnect();
+			this._mutationObserver = null;
+		}
+	}
+
+	static _mutationTouchesMedia(node) {
+		if (typeof Element === 'undefined' || !(node instanceof Element)) {
+			return false;
+		}
+		if (node.matches('video, iframe')) {
+			return true;
+		}
+		return Boolean(node.querySelector('video, iframe'));
+	}
+
+	_reflectStringAttribute(attrName, value) {
+		if (value === null || value === undefined || value === '') {
+			this.removeAttribute(attrName);
+			return;
+		}
+		this.setAttribute(attrName, String(value));
+	}
+
+	_upgradeProperty(prop) {
+		if (Object.prototype.hasOwnProperty.call(this, prop)) {
+			const value = this[prop];
+			delete this[prop];
+			this[prop] = value;
+		}
+	}
+
+	_observeTargetAttributes() {
+		this._disconnectTargetObserver();
+		this._restoreTargetAttributePatchedMethods();
+		if (!this._target) {
+			return;
+		}
+
+		if (typeof MutationObserver === 'function') {
+			this._targetObserver = new MutationObserver((mutations) => {
+				for (const mutation of mutations) {
+					if (mutation.type !== 'attributes') {
+						continue;
+					}
+					this._handleTargetAttributeChange(mutation.attributeName);
+				}
+			});
+
+			this._targetObserver.observe(this._target, {
+				attributes: true,
+				attributeFilter: ['aria-label', 'title', 'id'],
+			});
+		}
+
+		this._patchTargetAttributeMethods();
+	}
+
+	_disconnectTargetObserver() {
+		if (this._targetObserver) {
+			this._targetObserver.disconnect();
+			this._targetObserver = null;
+		}
+	}
+
+	_patchTargetAttributeMethods() {
+		if (!this._target || this._patchedTarget === this._target) {
+			return;
+		}
+
+		this._patchedTarget = this._target;
+		this._originalTargetSetAttribute = this._patchedTarget.setAttribute;
+		this._originalTargetRemoveAttribute =
+			this._patchedTarget.removeAttribute;
+
+		const element = this._patchedTarget;
+		const component = this;
+
+		element.setAttribute = function patchedSetAttribute(name, value) {
+			const result = component._originalTargetSetAttribute.call(
+				this,
+				name,
+				value,
+			);
+			component._handleTargetAttributeChange(name);
+			return result;
+		};
+
+		element.removeAttribute = function patchedRemoveAttribute(name) {
+			const result = component._originalTargetRemoveAttribute.call(
+				this,
+				name,
+			);
+			component._handleTargetAttributeChange(name);
+			return result;
+		};
+	}
+
+	_restoreTargetAttributePatchedMethods() {
+		if (!this._patchedTarget) {
+			return;
+		}
+		if (this._originalTargetSetAttribute) {
+			this._patchedTarget.setAttribute = this._originalTargetSetAttribute;
+		}
+		if (this._originalTargetRemoveAttribute) {
+			this._patchedTarget.removeAttribute =
+				this._originalTargetRemoveAttribute;
+		}
+		this._patchedTarget = null;
+		this._originalTargetSetAttribute = null;
+		this._originalTargetRemoveAttribute = null;
+	}
+
+	_handleTargetAttributeChange(attributeName) {
+		if (!attributeName) {
+			return;
+		}
+		if (attributeName === 'aria-label' || attributeName === 'title') {
+			this._queueButtonTextUpdate();
+		}
+		if (attributeName === 'id') {
+			this._targetId = this._target?.getAttribute('id') || null;
+			this._syncButtonControlAssociation();
+		}
+	}
+
+	_queueButtonTextUpdate() {
+		if (!this._button || this._pendingButtonUpdate !== null) {
+			return;
+		}
+
+		const runUpdate = () => {
+			this._pendingButtonUpdate = null;
+			this._pendingButtonUpdateUsesTimeout = false;
+			this._updateButtonText();
+		};
+
+		if (typeof requestAnimationFrame === 'function') {
+			this._pendingButtonUpdateUsesTimeout = false;
+			this._pendingButtonUpdate = requestAnimationFrame(runUpdate);
+			return;
+		}
+
+		this._pendingButtonUpdateUsesTimeout = true;
+		this._pendingButtonUpdate = setTimeout(runUpdate, 0);
+	}
+
+	_cancelQueuedButtonTextUpdate() {
+		if (this._pendingButtonUpdate === null) {
+			return;
+		}
+
+		if (this._pendingButtonUpdateUsesTimeout) {
+			clearTimeout(this._pendingButtonUpdate);
+		} else if (typeof cancelAnimationFrame === 'function') {
+			cancelAnimationFrame(this._pendingButtonUpdate);
+		} else {
+			clearTimeout(this._pendingButtonUpdate);
+		}
+		this._pendingButtonUpdate = null;
+		this._pendingButtonUpdateUsesTimeout = false;
+	}
+
+	_startFullscreenObserver() {
+		if (this._isObservingFullscreen) {
+			return;
+		}
+
+		if (typeof AbortController === 'function') {
+			this._fullscreenChangeAbortController = new AbortController();
+			document.addEventListener(
+				'fullscreenchange',
+				this._handleFullscreenChange,
+				{
+					signal: this._fullscreenChangeAbortController.signal,
+				},
+			);
+		} else {
+			document.addEventListener(
+				'fullscreenchange',
+				this._handleFullscreenChange,
+			);
+		}
+
+		this._isObservingFullscreen = true;
+	}
+
+	_stopFullscreenObserver() {
+		if (!this._isObservingFullscreen) {
+			return;
+		}
+		if (this._fullscreenChangeAbortController) {
+			this._fullscreenChangeAbortController.abort();
+			this._fullscreenChangeAbortController = null;
+		} else {
+			document.removeEventListener(
+				'fullscreenchange',
+				this._handleFullscreenChange,
+			);
+		}
+		this._isObservingFullscreen = false;
+	}
+
+	_syncButtonControlAssociation() {
+		if (!this._button) {
+			return;
+		}
+		if (this._targetId) {
+			this._button.setAttribute('aria-controls', this._targetId);
+		} else {
+			this._button.removeAttribute('aria-controls');
+		}
+	}
+
 	_isFullscreen() {
 		return (
 			document.fullscreenElement === this._target ||
@@ -249,20 +577,26 @@ export class FullscreenControlElement extends HTMLElement {
 		}
 
 		try {
+			let didEnter = false;
 			if (this._target.requestFullscreen) {
 				await this._target.requestFullscreen();
+				didEnter = true;
 			} else if (this._target.webkitRequestFullscreen) {
 				await this._target.webkitRequestFullscreen();
+				didEnter = true;
 			} else if (this._target.mozRequestFullScreen) {
 				await this._target.mozRequestFullScreen();
+				didEnter = true;
 			}
 
-			this.dispatchEvent(
-				new CustomEvent('fullscreen-control:enter', {
-					bubbles: true,
-					composed: true,
-				}),
-			);
+			if (didEnter) {
+				this.dispatchEvent(
+					new CustomEvent('fullscreen-control:enter', {
+						bubbles: true,
+						composed: true,
+					}),
+				);
+			}
 		} catch (error) {
 			console.error('Error entering fullscreen:', error);
 		}
@@ -273,20 +607,26 @@ export class FullscreenControlElement extends HTMLElement {
 	 */
 	async exitFullscreen() {
 		try {
+			let didExit = false;
 			if (document.exitFullscreen) {
 				await document.exitFullscreen();
+				didExit = true;
 			} else if (document.webkitExitFullscreen) {
 				await document.webkitExitFullscreen();
+				didExit = true;
 			} else if (document.mozCancelFullScreen) {
 				await document.mozCancelFullScreen();
+				didExit = true;
 			}
 
-			this.dispatchEvent(
-				new CustomEvent('fullscreen-control:exit', {
-					bubbles: true,
-					composed: true,
-				}),
-			);
+			if (didExit) {
+				this.dispatchEvent(
+					new CustomEvent('fullscreen-control:exit', {
+						bubbles: true,
+						composed: true,
+					}),
+				);
+			}
 		} catch (error) {
 			console.error('Error exiting fullscreen:', error);
 		}
@@ -296,6 +636,12 @@ export class FullscreenControlElement extends HTMLElement {
 	 * Toggle fullscreen mode
 	 */
 	toggleFullscreen() {
+		if (!this._target) {
+			console.warn(
+				'fullscreen-control: No target element to toggle fullscreen',
+			);
+			return;
+		}
 		if (this._isFullscreen()) {
 			this.exitFullscreen();
 		} else {

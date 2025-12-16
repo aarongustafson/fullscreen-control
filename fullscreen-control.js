@@ -181,7 +181,11 @@ export class FullscreenControlElement extends HTMLElement {
 
 	_cleanup() {
 		if (this._internals?.states) {
-			this._internals.states.remove('rendered');
+			if (typeof this._internals.states.delete === 'function') {
+				this._internals.states.delete('rendered');
+			} else if (typeof this._internals.states.remove === 'function') {
+				this._internals.states.remove('rendered');
+			}
 		}
 		this._cancelQueuedButtonTextUpdate();
 		if (this._button) {

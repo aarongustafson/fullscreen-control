@@ -24,12 +24,12 @@
 	"types": "fullscreen-control.d.ts",
 	"exports": {
 		".": {
-			"import": "./index.js",
-			"types": "./fullscreen-control.d.ts"
+			"types": "./fullscreen-control.d.ts",
+			"import": "./index.js"
 		},
 		"./fullscreen-control.js": {
-			"import": "./fullscreen-control.js",
-			"types": "./fullscreen-control.d.ts"
+			"types": "./fullscreen-control.d.ts",
+			"import": "./fullscreen-control.js"
 		},
 		"./define.js": {
 			"import": "./define.js"
@@ -46,10 +46,9 @@
 		"LICENSE"
 	],
 	"engines": {
-		"node": ">=20.0.0"
+		"node": ">=22.0.0"
 	},
 	"scripts": {
-		"setup": "node scripts/setup.js",
 		"test": "vitest",
 		"test:ui": "vitest --ui",
 		"test:run": "vitest run",

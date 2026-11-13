@@ -1,0 +1,42 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`preserves displayed code apart from release-managed CDN versions 1`] = `
+[
+  [
+    "esm.html",
+    "91dc46828136a1fe4516a692ae067106374a6ed648085aa802aea5276f61b98d",
+  ],
+  [
+    "index.html",
+    "d6af7d1d2f59dd9b7538ec64f53a5a6c975b61f4e0b76b6e3b5618fe359bb0df",
+  ],
+  [
+    "index.html",
+    "e813d321a421772ff07c185a384db36ba08cb0c016290c4ab28fe6737c823965",
+  ],
+  [
+    "index.html",
+    "5fbb81b1c72aced4ae92c3f25660b5dd73785c8e574122d35f722f63cf94d354",
+  ],
+  [
+    "index.html",
+    "2c70e1d3b64bfb0d184b01c041258b6fab62db7f08a1f5cdb67c5ed26a34ee05",
+  ],
+  [
+    "index.html",
+    "39cab85aee13be6fca2e6706985fdc55d91917943693f298b112b1103aec19f3",
+  ],
+  [
+    "index.html",
+    "41deca08b6049fbd814177005c3aba6d95c73c17545c82efb68763103159bac1",
+  ],
+  [
+    "index.html",
+    "a62bbc3c4f5c73ab5a1a070459ca0523bdb91b4cf3f4f75f50ccc93f796c12f0",
+  ],
+  [
+    "unpkg.html",
+    "c6e63541e1946860848b02a42d3c9246df35cf9fc6c5b2da13b8569f572e1782",
+  ],
+]
+`;

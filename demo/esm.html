@@ -37,17 +37,17 @@
 						tabindex="0"
 						aria-label="ESM import example code"
 					><code>&lt;script type="module"&gt;
-  import { FullscreenControlElement } from
-    'https://esm.sh/@aarongustafson/fullscreen-control@2.0.6/fullscreen-control.js?bundle&amp;target=es2022';
+  <mark>import { FullscreenControlElement } from
+    'https://esm.sh/@aarongustafson/fullscreen-control@2.0.6/fullscreen-control.js?bundle&amp;target=es2022';</mark>
   if (!customElements.get('fullscreen-control')) {
-    customElements.define('fullscreen-control',
-      FullscreenControlElement);
+    <mark>customElements.define('fullscreen-control',
+      FullscreenControlElement);</mark>
   }
 &lt;/script&gt;
-&lt;fullscreen-control&gt;
+<mark>&lt;fullscreen-control&gt;</mark>
   &lt;video src="./sample.webm" controls
     aria-label="Moving circle"&gt;&lt;/video&gt;
-&lt;/fullscreen-control&gt;</code></pre>
+<mark>&lt;/fullscreen-control&gt;</mark></code></pre>
 					<div class="demo">
 						<fullscreen-control
 							><video

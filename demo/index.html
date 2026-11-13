@@ -49,13 +49,13 @@
 					<pre
 						tabindex="0"
 						aria-label="Video example code"
-					><code>&lt;fullscreen-control&gt;
+					><code><mark>&lt;fullscreen-control&gt;</mark>
   &lt;video src="./sample.webm" controls
     width="320" height="180"
     aria-label="Moving circle"&gt;
     &lt;a href="./sample.webm"&gt;Open the sample clip&lt;/a&gt;
   &lt;/video&gt;
-&lt;/fullscreen-control&gt;
+<mark>&lt;/fullscreen-control&gt;</mark>
 &lt;p&gt;Silent clip: a circle moves left to right
   across a rectangle; no audio.&lt;/p&gt;</code></pre>
 					<div class="demo">
@@ -92,12 +92,12 @@
 					<pre
 						tabindex="0"
 						aria-label="Iframe example code"
-					><code>&lt;fullscreen-control id="iframe-demo"&gt;
+					><code><mark>&lt;fullscreen-control id="iframe-demo"&gt;</mark>
   &lt;iframe src="./frame.html"
     title="Product presentation"
     width="320" height="180"
     allow="fullscreen" allowfullscreen&gt;&lt;/iframe&gt;
-&lt;/fullscreen-control&gt;
+<mark>&lt;/fullscreen-control&gt;</mark>
 &lt;a href="./frame.html"&gt;Read the presentation&lt;/a&gt;</code></pre>
 					<div class="demo">
 						<fullscreen-control id="iframe-demo">
@@ -128,11 +128,11 @@
 					<pre
 						tabindex="0"
 						aria-label="Japanese example code"
-					><code>&lt;fullscreen-control lang="ja"
-  button-text="全画面表示"&gt;
+					><code><mark>&lt;fullscreen-control lang="ja"
+  button-text="全画面表示"&gt;</mark>
   &lt;video src="./sample.webm" controls
     aria-label="円の動き"&gt;&lt;/video&gt;
-&lt;/fullscreen-control&gt;</code></pre>
+<mark>&lt;/fullscreen-control&gt;</mark></code></pre>
 					<div class="demo" lang="ja">
 						<fullscreen-control lang="ja" button-text="全画面表示">
 							<video
@@ -166,11 +166,11 @@
 					<pre
 						tabindex="0"
 						aria-label="Named media example code"
-					><code>&lt;fullscreen-control
-  button-text="View {name} fullscreen"&gt;
+					><code><mark>&lt;fullscreen-control
+  button-text="View {name} fullscreen"&gt;</mark>
   &lt;video src="./sample.webm" controls
     aria-label="Moving circle"&gt;&lt;/video&gt;
-&lt;/fullscreen-control&gt;</code></pre>
+<mark>&lt;/fullscreen-control&gt;</mark></code></pre>
 					<div class="demo">
 						<fullscreen-control
 							id="named-demo"
@@ -206,13 +206,13 @@
 						tabindex="0"
 						aria-label="Icon-only button example code"
 					><code>&lt;div class="demo"&gt;
-&lt;fullscreen-control class="icon-only"
+<mark>&lt;fullscreen-control class="icon-only"
   button-text="⤢"
-  button-label="View {name} fullscreen"&gt;
+  button-label="View {name} fullscreen"&gt;</mark>
   &lt;video src="./sample.webm" controls
     width="320" height="180"
     aria-label="Moving circle"&gt;&lt;/video&gt;
-&lt;/fullscreen-control&gt;
+<mark>&lt;/fullscreen-control&gt;</mark>
 &lt;/div&gt;
 
 &lt;style&gt;
@@ -259,15 +259,15 @@
 					<pre
 						tabindex="0"
 						aria-label="Event example code"
-					><code>&lt;fullscreen-control id="event-demo"&gt;
+					><code><mark>&lt;fullscreen-control id="event-demo"&gt;</mark>
   &lt;video src="./sample.webm" controls
     aria-label="Moving circle"&gt;&lt;/video&gt;
-&lt;/fullscreen-control&gt;
+<mark>&lt;/fullscreen-control&gt;</mark>
 &lt;script&gt;
   const media = document.querySelector('#event-demo');
-  media.addEventListener('fullscreen-control:enter',
+  media.addEventListener(<mark>'fullscreen-control:enter'</mark>,
     () =&gt; console.log('Entered fullscreen'));
-  media.addEventListener('fullscreen-control:exit',
+  media.addEventListener(<mark>'fullscreen-control:exit'</mark>,
     () =&gt; console.log('Exited fullscreen'));
 &lt;/script&gt;</code></pre>
 					<div class="demo">

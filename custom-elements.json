@@ -1,6 +1,5 @@
 {
 	"schemaVersion": "1.0.0",
-	"readme": "",
 	"modules": [
 		{
 			"kind": "javascript-module",
@@ -18,6 +17,8 @@
 								"text": "string"
 							},
 							"description": "The visible text displayed inside the fullscreen button.",
+							"attribute": "button-text",
+							"reflects": true,
 							"default": "'View fullscreen'"
 						},
 						{
@@ -27,6 +28,8 @@
 								"text": "string"
 							},
 							"description": "Optional aria-label text for the fullscreen button. Falls back to the visible button text when empty.",
+							"attribute": "button-label",
+							"reflects": true,
 							"default": "''"
 						},
 						{
@@ -37,7 +40,7 @@
 									"text": "Promise<void>"
 								}
 							},
-							"description": "Enters fullscreen mode for the component and its contained element."
+							"description": "Requests fullscreen for the first nested video or iframe, not the host. Usually requires a user gesture. Failures are logged; the promise does not report success."
 						},
 						{
 							"kind": "method",
@@ -66,38 +69,34 @@
 							"type": {
 								"text": "CustomEvent"
 							},
-							"description": "Fired when the element enters fullscreen mode."
+							"description": "Fired on an observed transition into fullscreen for the media. Bubbles and is composed; detail is null."
 						},
 						{
 							"name": "fullscreen-control:exit",
 							"type": {
 								"text": "CustomEvent"
 							},
-							"description": "Fired when the element exits fullscreen mode."
+							"description": "Fired on an observed transition out of fullscreen for the media. Bubbles and is composed; detail is null."
 						}
 					],
 					"attributes": [
 						{
 							"name": "button-text",
+							"fieldName": "buttonText",
 							"type": {
 								"text": "string"
 							},
-							"description": "Visible text for the fullscreen button. Supports the {name} token to inject the accessible name of the slotted media element.",
+							"description": "Visible button text. Each {name} token uses the target's first nonempty aria-label or title, or an empty string. Names use String.replace replacement string semantics, including special $ sequences; resolved output is inserted as text, not HTML. Missing or empty text uses the default.",
 							"default": "'View fullscreen'"
 						},
 						{
 							"name": "button-label",
+							"fieldName": "buttonLabel",
 							"type": {
 								"text": "string"
 							},
-							"description": "Optional aria-label for the fullscreen button. Supports the {name} token. When omitted, the aria-label matches button-text—use it only when you need different screen-reader wording.",
+							"description": "Optional button aria-label with the same {name} substitution as button-text. Empty or identical resolved labels omit aria-label so visible text names the button. Include the visible wording in a distinct label.",
 							"default": "''"
-						}
-					],
-					"slots": [
-						{
-							"name": "",
-							"description": "Default slot for a video or iframe element to be enhanced with fullscreen capabilities."
 						}
 					],
 					"cssProperties": [
@@ -123,6 +122,59 @@
 				{
 					"kind": "js",
 					"name": "FullscreenControlElement",
+					"declaration": {
+						"name": "FullscreenControlElement",
+						"module": "fullscreen-control.js"
+					}
+				}
+			]
+		},
+		{
+			"kind": "javascript-module",
+			"path": "index.js",
+			"description": "Class-only package entry; does not register a custom element.",
+			"declarations": [],
+			"exports": [
+				{
+					"kind": "js",
+					"name": "FullscreenControlElement",
+					"declaration": {
+						"name": "FullscreenControlElement",
+						"module": "fullscreen-control.js"
+					}
+				}
+			]
+		},
+		{
+			"kind": "javascript-module",
+			"path": "define.js",
+			"declarations": [
+				{
+					"kind": "function",
+					"name": "defineFullscreenControl",
+					"description": "Importing this module registers the default tag when a browser registry is available. The helper returns false without a usable registry and true when the requested tag is already defined. Calling it for another unregistered tag throws NotSupportedError because the constructor is already registered. For a custom tag, use the class-only import from fullscreen-control.js and register once without importing this module.",
+					"parameters": [
+						{
+							"name": "tagName",
+							"type": { "text": "string" },
+							"default": "'fullscreen-control'"
+						}
+					],
+					"return": { "type": { "text": "boolean" } }
+				}
+			],
+			"exports": [
+				{
+					"kind": "js",
+					"name": "defineFullscreenControl",
+					"declaration": {
+						"name": "defineFullscreenControl",
+						"module": "define.js"
+					}
+				},
+				{
+					"kind": "custom-element-definition",
+					"name": "fullscreen-control",
 					"declaration": {
 						"name": "FullscreenControlElement",
 						"module": "fullscreen-control.js"

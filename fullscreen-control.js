@@ -9,8 +9,6 @@
  * @fires fullscreen-control:enter - Fired when entering fullscreen mode
  * @fires fullscreen-control:exit - Fired when exiting fullscreen mode
  *
- * @slot - Default slot for video or iframe content
- *
  * @cssprop --fullscreen-control-button-inset-block-start - Block-start position of the button (default: 0.5rem)
  * @cssprop --fullscreen-control-button-inset-inline-end - Inline-end position of the button (default: 0.5rem)
  */

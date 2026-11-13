@@ -5,7 +5,22 @@ export default [
 	...eslintConfig,
 	eslintConfigPrettier,
 	{
-		ignores: ['node_modules/**', 'coverage/**', 'demo/**'],
+		files: ['scripts/create-demo-video.js'],
+		rules: {
+			'import-x/no-extraneous-dependencies': [
+				'error',
+				{ devDependencies: true },
+			],
+		},
+	},
+	{
+		ignores: [
+			'node_modules/**',
+			'coverage/**',
+			'demo/**',
+			'playwright-report/**',
+			'test-results/**',
+		],
 	},
 	{
 		files: ['demo/**/*.html'],

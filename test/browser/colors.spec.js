@@ -390,7 +390,7 @@ test('class-only imports preserve manual registration and default positioning ho
 	).toBe('NotSupportedError');
 });
 
-test('labels, associations, literal content, and lifecycle cleanup remain native', async ({
+test('labels, associations, HTML-safe content, and lifecycle cleanup remain native', async ({
 	page,
 }) => {
 	await demo(page);
@@ -433,6 +433,32 @@ test('labels, associations, literal content, and lifecycle cleanup remain native
 	await expect(page.locator('#fullscreen-control-styles')).toHaveCount(1);
 });
 
+test('name substitution retains existing replacement-string semantics without parsing HTML', async ({
+	page,
+}) => {
+	await demo(page);
+	for (const selector of ['#named-demo', '.icon-only']) {
+		const host = page.locator(selector);
+		for (const [name, expected] of [
+			['$&', 'View {name} fullscreen'],
+			['$$', 'View $ fullscreen'],
+			['$`', 'View View  fullscreen'],
+			["$'", 'View  fullscreen fullscreen'],
+		]) {
+			await host
+				.locator('video')
+				.evaluate(
+					(video, name) => video.setAttribute('aria-label', name),
+					name,
+				);
+			await expect(host.locator('button')).toHaveAccessibleName(expected);
+			await expect(host.locator('button')).toHaveText(
+				selector === '.icon-only' ? '⤢' : expected,
+			);
+		}
+	}
+});
+
 test('native iframe fullscreen fires events and restores keyboard focus after exit', async ({
 	page,
 }) => {
@@ -444,9 +470,17 @@ test('native iframe fullscreen fires events and restores keyboard focus after ex
 	const host = page.locator('#iframe-demo');
 	await host.evaluate((host) => {
 		host.dataset.events = '';
+		host.dataset.payloads = '[]';
 		for (const type of ['enter', 'exit'])
-			host.addEventListener(`fullscreen-control:${type}`, () => {
+			host.addEventListener(`fullscreen-control:${type}`, (event) => {
 				host.dataset.events += `${type} `;
+				const payloads = JSON.parse(host.dataset.payloads);
+				payloads.push({
+					detail: event.detail,
+					bubbles: event.bubbles,
+					composed: event.composed,
+				});
+				host.dataset.payloads = JSON.stringify(payloads);
 			});
 	});
 	const button = host.locator('button');
@@ -458,6 +492,12 @@ test('native iframe fullscreen fires events and restores keyboard focus after ex
 	await expect(host).toHaveAttribute('data-events', 'enter ');
 	await page.evaluate(() => document.exitFullscreen());
 	await expect(host).toHaveAttribute('data-events', 'enter exit ');
+	expect(
+		await host.evaluate((host) => JSON.parse(host.dataset.payloads)),
+	).toEqual([
+		{ detail: null, bubbles: true, composed: true },
+		{ detail: null, bubbles: true, composed: true },
+	]);
 	await expect(button).toBeFocused();
 });
 

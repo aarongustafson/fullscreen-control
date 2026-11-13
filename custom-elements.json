@@ -69,14 +69,14 @@
 							"type": {
 								"text": "CustomEvent"
 							},
-							"description": "Fired when the element enters fullscreen mode."
+							"description": "Fired on an observed transition into fullscreen for the media. Bubbles and is composed; detail is null."
 						},
 						{
 							"name": "fullscreen-control:exit",
 							"type": {
 								"text": "CustomEvent"
 							},
-							"description": "Fired when the element exits fullscreen mode."
+							"description": "Fired on an observed transition out of fullscreen for the media. Bubbles and is composed; detail is null."
 						}
 					],
 					"attributes": [
@@ -86,7 +86,7 @@
 							"type": {
 								"text": "string"
 							},
-							"description": "Visible button text. Each {name} token uses the target's first nonempty aria-label or title, or an empty string. Missing or empty text uses the default.",
+							"description": "Visible button text. Each {name} token uses the target's first nonempty aria-label or title, or an empty string. Names use String.replace replacement string semantics, including special $ sequences; resolved output is inserted as text, not HTML. Missing or empty text uses the default.",
 							"default": "'View fullscreen'"
 						},
 						{

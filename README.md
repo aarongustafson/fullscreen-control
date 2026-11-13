@@ -94,7 +94,12 @@ The bundled TypeScript declarations describe the string-valued public API.
 Every `{name}` token uses the media’s first nonempty `aria-label` or `title`,
 then an empty string. This is not a full accessible-name calculation:
 `aria-labelledby`, captions, and other native naming sources are not consulted.
-Text is inserted literally, not parsed as HTML.
+Resolved labels are assigned as text, not parsed as HTML. However, the media
+name is passed to `String.replace` as a replacement string, not a literal value.
+Names containing [replacement patterns](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_the_replacement)
+such as `$&` or `$$` are interpreted accordingly. For example, a name of `$&`
+leaves `{name}` in the resolved label. Avoid replacement sequences in names
+used with `{name}`; this is an existing runtime limitation.
 
 Author translated labels and set the content language:
 
@@ -142,12 +147,15 @@ also leave the media unchanged. Keep native controls and fallback links usable,
 and provide authored, localized recovery guidance when fullscreen is important
 to a task.
 
-| Event                      | Detail      | Behavior                                            |
-| -------------------------- | ----------- | --------------------------------------------------- |
-| `fullscreen-control:enter` | `undefined` | Observed transition into fullscreen for this media. |
-| `fullscreen-control:exit`  | `undefined` | Observed transition out of fullscreen.              |
+| Event                      | Detail | Behavior                                            |
+| -------------------------- | ------ | --------------------------------------------------- |
+| `fullscreen-control:enter` | `null` | Observed transition into fullscreen for this media. |
+| `fullscreen-control:exit`  | `null` | Observed transition out of fullscreen.              |
 
-Both are bubbling, composed `CustomEvent<void>` events. They report observed
+Both are bubbling, composed `CustomEvent` events with `detail === null`.
+The existing declaration aliases use `CustomEvent<void>` to indicate no
+application payload; that annotation does not change the browser value.
+The events report observed
 `fullscreenchange` transitions, not merely a request. Vendor-prefixed request
 methods are attempted as fallbacks, but prefixed-only change events are not
 observed. Do not treat method completion as proof that fullscreen succeeded.

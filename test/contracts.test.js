@@ -3,6 +3,27 @@ import { it, expect } from 'vitest';
 
 const read = (path) => readFile(new URL(path, import.meta.url), 'utf8');
 
+it('documents replacement-string name substitution and null event payloads', async () => {
+	const readme = await read('../README.md');
+	expect(readme).toContain('replacement string');
+	expect(readme).toContain('$&');
+	const events = readme
+		.split('\n')
+		.filter((line) => line.startsWith('| `fullscreen-control:'));
+	expect(events).toHaveLength(2);
+	for (const event of events) expect(event).toMatch(/\|\s*`null`\s*\|/);
+	const manifest = JSON.parse(await read('../custom-elements.json'));
+	const component = manifest.modules.find(
+		(entry) => entry.path === 'fullscreen-control.js',
+	).declarations[0];
+	expect(
+		component.attributes.find((entry) => entry.name === 'button-text')
+			.description,
+	).toContain('replacement string');
+	for (const event of component.events)
+		expect(event.description).toContain('detail is null');
+});
+
 it('describes the real light-DOM API and guarded registration', async () => {
 	const manifest = JSON.parse(await read('../custom-elements.json'));
 	expect(manifest).not.toHaveProperty('readme');
@@ -51,7 +72,14 @@ it('provides paired code/live layouts and native fallback media on every import 
 		expect(html).toContain('class="code-demo-pair"');
 		expect(html).toContain('class="demo"');
 		expect(html).toContain('controls');
-		expect(html).toContain('README.md');
+		const links = [...html.matchAll(/href="([^"]*README\.md)"/g)].map(
+			(match) => match[1],
+		);
+		expect(links).toHaveLength(name === 'index' ? 2 : 1);
+		for (const link of links)
+			expect(link).toBe(
+				'https://github.com/aarongustafson/fullscreen-control/blob/main/README.md',
+			);
 		expect(html).toContain('<footer>');
 		expect(html).toMatch(/<noscript[\s>]/);
 	}

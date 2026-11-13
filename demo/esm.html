@@ -39,7 +39,7 @@
 					><code>&lt;script type="module"&gt;
   <mark>import { FullscreenControlElement } from
     'https://esm.sh/@aarongustafson/fullscreen-control@2.0.6/fullscreen-control.js?bundle&amp;target=es2022';</mark>
-  if (!customElements.get('fullscreen-control')) {
+  if (!<mark>customElements.get('fullscreen-control')</mark>) {
     <mark>customElements.define('fullscreen-control',
       FullscreenControlElement);</mark>
   }

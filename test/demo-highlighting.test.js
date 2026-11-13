@@ -72,6 +72,7 @@ it('marks each component tag, API attribute, import, and registration without ne
 		const patterns = [
 			new RegExp(`<\\/?${component}\\b[^>]*>`, 'g'),
 			new RegExp(`['"]${component}:[\\w-]+['"]`, 'g'),
+			/\bcustomElements\.get\('[^']+'\)/g,
 			/\bimport\s+(?!map)[^;]+;/g,
 			/\b(?:customElements\.define|define[A-Z]\w*)\([^;]+;/g,
 			/\bdata-(?:tab-short-name|sort-value|sort-as|table-sort-group)(?:="[^"]*")?/g,

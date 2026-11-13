@@ -108,6 +108,26 @@ When providing a distinct `button-label`, include the visible wording in that
 name so speech-input users can refer to what they see. Localize the media’s name,
 fallback instructions, captions, and descriptions too.
 
+### Icon-only buttons
+
+Give an icon-only button an authored accessible name. For example, a diagonal
+two-headed arrow can represent fullscreen without becoming the button’s
+screen-reader name:
+
+```html
+<fullscreen-control
+  class="icon-only"
+  button-text="⤢"
+  button-label="View {name} fullscreen"
+>
+  <video src="video.webm" controls aria-label="Product demonstration"></video>
+</fullscreen-control>
+```
+
+Translate `button-label` and the media name for the content language. Keep a
+visible explanation of the icon’s purpose nearby. The demo gives this button a
+minimum 44px target and retains its native focus indicator.
+
 ## Methods and events
 
 | Method               | Return          | Behavior                                                          |
@@ -151,19 +171,41 @@ does not inject a color palette or replace native focus styling.
 | `--fullscreen-control-button-inset-block-start` | `0.5rem` | Block-start offset for the overlay. |
 | `--fullscreen-control-button-inset-inline-end`  | `0.5rem` | Inline-end offset for the overlay.  |
 
-For long labels and enlarged text, place the button in flow below the media.
-For example, wrap the component in an element with `class="media-example"`:
+Keep the button overlaid while allowing room for long labels and enlarged
+text. The demos place media and button in the same grid cell, leaving a clear
+strip for native playback controls. The media area grows when the label needs
+more height; the button does not move below it. The positioning hooks still
+control its offsets. For example, wrap the component in an element with
+`class="media-example"`:
 
 ```css
 .media-example fullscreen-control {
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.media-example video,
+.media-example iframe {
+  grid-area: 1 / 1;
+  inline-size: 100%;
+  block-size: 100%;
+  aspect-ratio: 16 / 9;
 }
 
 .media-example fullscreen-control > button {
   position: static;
-  max-inline-size: 100%;
+  grid-area: 1 / 1;
+  place-self: start end;
+  max-inline-size: calc(
+    100% - var(--fullscreen-control-button-inset-inline-end, 0.5rem) - 0.5rem
+  );
   min-block-size: 2.75rem;
-  margin-block-start: 0.5rem;
+  margin-block-start: var(
+    --fullscreen-control-button-inset-block-start,
+    0.5rem
+  );
+  margin-inline-end: var(--fullscreen-control-button-inset-inline-end, 0.5rem);
+  margin-block-end: 3rem;
   padding: 0.5rem 1rem;
   font: inherit;
   overflow-wrap: anywhere;
@@ -171,6 +213,13 @@ For example, wrap the component in an element with `class="media-example"`:
   background-color: Canvas;
   background-image: linear-gradient(ButtonFace, ButtonFace);
   color: ButtonText;
+}
+
+.media-example .icon-only > button {
+  inline-size: 2.75rem;
+  padding: 0.25rem;
+  font-size: 1.75rem;
+  line-height: 1;
 }
 ```
 

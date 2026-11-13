@@ -109,23 +109,39 @@ pre code {
 }
 
 .demo fullscreen-control {
-	display: block;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
 	max-inline-size: 100%;
 }
 .demo video,
 .demo iframe {
+	grid-area: 1 / 1;
 	display: block;
 	inline-size: 100%;
-	block-size: auto;
+	block-size: 100%;
 	aspect-ratio: 16 / 9;
 	border: 1px solid CanvasText;
 }
 .demo fullscreen-control > button {
 	position: static;
+	grid-area: 1 / 1;
+	place-self: start end;
 	display: block;
-	max-inline-size: 100%;
+	max-inline-size: calc(
+		100% - var(--fullscreen-control-button-inset-inline-end, 0.5rem) -
+			0.5rem
+	);
 	min-block-size: 2.75rem;
-	margin-block-start: 0.5rem;
+	margin-block-start: var(
+		--fullscreen-control-button-inset-block-start,
+		0.5rem
+	);
+	margin-inline-end: var(
+		--fullscreen-control-button-inset-inline-end,
+		0.5rem
+	);
+	/* Keep native playback controls clear when enlarged labels grow the row. */
+	margin-block-end: 3rem;
 	border: 1px solid currentColor;
 	border-radius: 0.25rem;
 	padding: 0.5rem 1rem;
@@ -150,6 +166,12 @@ pre code {
 .demo .custom-style > button:hover {
 	background: #8d2828;
 }
+.demo .icon-only > button {
+	inline-size: 2.75rem;
+	padding: 0.25rem;
+	font-size: 1.75rem;
+	line-height: 1;
+}
 .event-log {
 	margin-block-start: 1rem;
 	font-family: ui-monospace, monospace;
@@ -164,7 +186,7 @@ pre code {
 		padding: 0.5rem;
 	}
 	.demo fullscreen-control > button {
-		padding-inline: 0.5rem;
+		padding-inline: 0.25rem;
 	}
 	.demo-section,
 	.api-reference,

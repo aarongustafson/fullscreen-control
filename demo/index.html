@@ -18,9 +18,10 @@
 		<main>
 			<p>
 				Use the fullscreen button, then Escape or the browser’s
-				fullscreen controls to return. These examples place buttons
-				below the media so long labels do not cover native playback
-				controls. The component’s default is a top-right overlay.
+				fullscreen controls to return. Buttons overlay the top-right of
+				the media. With enlarged labels, the demo’s media area grows to
+				keep the overlay inside it and clear of native playback
+				controls.
 			</p>
 			<p>
 				Before JavaScript loads, or if enhancement fails, videos retain
@@ -189,6 +190,60 @@
 				</div>
 			</section>
 			<section class="demo-section">
+				<h2>Icon-only fullscreen button</h2>
+				<p>
+					The diagonal two-headed arrow opens the clip in fullscreen.
+					Use <code>button-text</code> for the symbol and
+					<code>button-label</code> for an authored accessible name.
+					The name describes the action rather than announcing the
+					arrow character. The native focus ring remains.
+				</p>
+				<div class="code-demo-pair">
+					<pre
+						tabindex="0"
+						aria-label="Icon-only button example code"
+					><code>&lt;div class="demo"&gt;
+&lt;fullscreen-control class="icon-only"
+  button-text="⤢"
+  button-label="View {name} fullscreen"&gt;
+  &lt;video src="./sample.webm" controls
+    width="320" height="180"
+    aria-label="Moving circle"&gt;&lt;/video&gt;
+&lt;/fullscreen-control&gt;
+&lt;/div&gt;
+
+&lt;style&gt;
+.demo .icon-only &gt; button {
+  inline-size: 2.75rem;
+  padding: 0.25rem;
+  font-size: 1.75rem;
+  line-height: 1;
+}
+&lt;/style&gt;</code></pre>
+					<div class="demo">
+						<fullscreen-control
+							class="icon-only"
+							button-text="⤢"
+							button-label="View {name} fullscreen"
+						>
+							<video
+								src="./sample.webm"
+								controls
+								preload="none"
+								width="320"
+								height="180"
+								aria-label="Moving circle"
+							></video>
+						</fullscreen-control>
+						<p>The diagonal arrow opens the clip in fullscreen.</p>
+						<p>
+							Silent clip: a circle moves left to right across a
+							rectangle; no audio.
+						</p>
+					</div>
+				</div>
+			</section>
+			<section class="demo-section">
 				<h2>Fullscreen events</h2>
 				<p>
 					<code>fullscreen-control:enter</code> and
@@ -297,8 +352,9 @@
 					and
 					<code>--fullscreen-control-button-inset-inline-end</code>
 					both default to <code>0.5rem</code>. They position the
-					default overlay; these demos override
-					<code>position</code> to keep the button in flow.
+					default overlay. These demos use the same offsets in a
+					shared grid cell so the button stays over the media while
+					the media area can grow with enlarged labels.
 				</p>
 				<p>
 					Fullscreen failures are logged to the console, not shown by

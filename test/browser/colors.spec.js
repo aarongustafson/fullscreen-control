@@ -330,7 +330,7 @@ test('local silent video decodes and plays to completion without autoplay', asyn
 					console.error('Test playback failed:', error),
 				);
 		});
-		video.after(play);
+		video.parentElement.after(play);
 	});
 	await page
 		.getByRole('button', { name: 'Play test clip', exact: true })
@@ -461,6 +461,67 @@ test('native iframe fullscreen fires events and restores keyboard focus after ex
 	await expect(button).toBeFocused();
 });
 
+test('diagonal-arrow control keeps its authored accessible name and native focus', async ({
+	page,
+}) => {
+	await demo(page);
+	const host = page.locator('.icon-only');
+	const button = host.locator('button');
+	await expect(button).toHaveCount(1);
+	await expect(button).toHaveText('⤢');
+	await expect(button).toHaveAccessibleName('View Moving circle fullscreen');
+	await expect(button).toHaveAttribute(
+		'aria-controls',
+		await host.locator('video').getAttribute('id'),
+	);
+	await button.focus();
+	expect(
+		await button.evaluate(
+			(button) => getComputedStyle(button).outlineStyle,
+		),
+	).not.toBe('none');
+	await host
+		.locator('video')
+		.evaluate((video) => video.setAttribute('aria-label', 'Updated clip'));
+	await expect(button).toHaveAccessibleName('View Updated clip fullscreen');
+	await expect(button).toHaveText('⤢');
+});
+
+test('overlaid demos preserve authored logical positioning offsets', async ({
+	page,
+}) => {
+	await demo(page);
+	const host = page.locator('fullscreen-control').first();
+	await host.evaluate((host) => {
+		host.style.setProperty(
+			'--fullscreen-control-button-inset-block-start',
+			'1rem',
+		);
+		host.style.setProperty(
+			'--fullscreen-control-button-inset-inline-end',
+			'1.5rem',
+		);
+	});
+	for (const direction of ['ltr', 'rtl']) {
+		await host.evaluate((host, direction) => {
+			host.dir = direction;
+		}, direction);
+		const offsets = await host.evaluate((host) => {
+			const media = host.querySelector('video').getBoundingClientRect();
+			const button = host.querySelector('button').getBoundingClientRect();
+			return {
+				top: button.top - media.top,
+				end:
+					host.dir === 'rtl'
+						? button.left - media.left
+						: media.right - button.right,
+			};
+		});
+		expect(offsets.top).toBeCloseTo(16, 1);
+		expect(offsets.end).toBeCloseTo(24, 1);
+	}
+});
+
 test('ordinary fullscreen label words do not split at 320px with enlarged text', async ({
 	page,
 }) => {
@@ -528,6 +589,10 @@ test('forced colors and increased contrast preserve native focus and full-streng
 			.locator('body')
 			.evaluate((element) => getComputedStyle(element).color),
 	);
+	await expect(page.locator('.icon-only button')).toHaveText('⤢');
+	await expect(page.locator('.icon-only button')).toHaveAccessibleName(
+		'View Moving circle fullscreen',
+	);
 });
 
 for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
@@ -548,6 +613,7 @@ for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
 			for (const button of await page
 				.locator('fullscreen-control > button')
 				.all()) {
+				await button.scrollIntoViewIfNeeded();
 				const geometry = await button.evaluate((button) => {
 					const box = button.getBoundingClientRect();
 					const media = button.parentElement
@@ -557,13 +623,31 @@ for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
 						left: box.left,
 						right: box.right,
 						height: box.height,
-						below: box.top >= media.bottom,
+						topOffset: box.top - media.top,
+						endOffset: media.right - box.right,
+						bottomGap: media.bottom - box.bottom,
+						inset:
+							parseFloat(
+								getComputedStyle(document.documentElement)
+									.fontSize,
+							) / 2,
+						hit: button.contains(
+							document.elementFromPoint(
+								box.left + box.width / 2,
+								box.top + box.height / 2,
+							),
+						),
 					};
 				});
 				expect(geometry.left).toBeGreaterThanOrEqual(0);
 				expect(geometry.right).toBeLessThanOrEqual(width);
 				expect(geometry.height).toBeGreaterThanOrEqual(44);
-				expect(geometry.below).toBe(true);
+				expect(geometry.hit).toBe(true);
+				expect(geometry.topOffset).toBeCloseTo(geometry.inset, 1);
+				expect(geometry.endOffset).toBeCloseTo(geometry.inset, 1);
+				expect(geometry.bottomGap).toBeGreaterThanOrEqual(
+					geometry.inset * 6 - 1,
+				);
 			}
 		}
 		await page.setViewportSize({ width: 1400, height: 900 });

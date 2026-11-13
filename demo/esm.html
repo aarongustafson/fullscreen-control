@@ -3,37 +3,79 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>fullscreen-control via esm.sh</title>
+		<title>Fullscreen Control via esm.sh</title>
 		<link rel="stylesheet" href="./styles.css" />
-		<style>
-			video {
-				max-width: 100%;
-				display: block;
-			}
-
-			fullscreen-control {
-				display: inline-block;
-			}
-		</style>
 	</head>
 	<body>
-		<h1>esm.sh CDN sanity check</h1>
-		<p>
-			This page loads the component class from <code>esm.sh</code> and
-			registers it manually.
-		</p>
-
-		<fullscreen-control>
-			<video
-				src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-				width="640"
-				height="360"
-			></video>
-		</fullscreen-control>
-
+		<header>
+			<h1>Fullscreen Control via esm.sh</h1>
+			<p>
+				Import the class and register it once. See the
+				<a href="../README.md">README</a> for the full API.
+			</p>
+		</header>
+		<main>
+			<p>
+				This page pins the class module’s version. CDN failure or
+				disabled JavaScript leaves the native video controls available.
+				Use Escape or browser controls to exit fullscreen.
+			</p>
+			<noscript
+				><p>
+					JavaScript is off. Use the native video controls or open the
+					clip directly.
+				</p></noscript
+			>
+			<section class="demo-section">
+				<h2>Class-only import</h2>
+				<div class="code-demo-pair">
+					<pre
+						tabindex="0"
+						aria-label="ESM import example code"
+					><code>&lt;script type="module"&gt;
+  import { FullscreenControlElement } from
+    'https://esm.sh/@aarongustafson/fullscreen-control@2.0.5/fullscreen-control.js?bundle&amp;target=es2022';
+  if (!customElements.get('fullscreen-control')) {
+    customElements.define('fullscreen-control',
+      FullscreenControlElement);
+  }
+&lt;/script&gt;
+&lt;fullscreen-control&gt;
+  &lt;video src="./sample.webm" controls
+    aria-label="Moving circle"&gt;&lt;/video&gt;
+&lt;/fullscreen-control&gt;</code></pre>
+					<div class="demo">
+						<fullscreen-control
+							><video
+								src="./sample.webm"
+								controls
+								preload="metadata"
+								width="320"
+								height="180"
+								aria-label="Moving circle"
+							></video
+						></fullscreen-control>
+						<p>
+							Silent clip: a circle moves left to right across a
+							rectangle; no audio.
+							<a href="./sample.webm">Open the sample clip</a>.
+						</p>
+					</div>
+				</div>
+			</section>
+		</main>
+		<footer>
+			<p>
+				Made with ❤️ by
+				<a href="https://github.com/aarongustafson">Aaron Gustafson</a>.
+				View the source on
+				<a href="https://github.com/aarongustafson/fullscreen-control"
+					>GitHub</a
+				>.
+			</p>
+		</footer>
 		<script type="module">
 			import { FullscreenControlElement } from 'https://esm.sh/@aarongustafson/fullscreen-control@2.0.5/fullscreen-control.js?bundle&target=es2022';
-
 			if (!customElements.get('fullscreen-control')) {
 				customElements.define(
 					'fullscreen-control',

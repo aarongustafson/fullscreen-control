@@ -100,6 +100,10 @@ pre code {
 	color: inherit;
 	font-size: inherit;
 }
+pre code mark {
+	background: Mark;
+	color: MarkText;
+}
 .demo {
 	background: Canvas;
 	color: CanvasText;

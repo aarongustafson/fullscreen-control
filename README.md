@@ -1,6 +1,10 @@
 # `fullscreen-control` Web Component
 
-[![npm version](https://img.shields.io/npm/v/@aarongustafson/fullscreen-control.svg)](https://www.npmjs.com/package/@aarongustafson/fullscreen-control) [![Build Status](https://img.shields.io/github/actions/workflow/status/aarongustafson/fullscreen-control/ci.yml?branch=main)](https://github.com/aarongustafson/fullscreen-control/actions)
+[![npm version](https://img.shields.io/npm/v/@aarongustafson/fullscreen-control.svg)](https://www.npmjs.com/package/@aarongustafson/fullscreen-control)
+[![CI status](https://img.shields.io/github/actions/workflow/status/aarongustafson/fullscreen-control/ci.yml?branch=main&label=CI)](https://github.com/aarongustafson/fullscreen-control/actions/workflows/ci.yml)
+[![Minified + gzipped size](https://img.shields.io/bundlejs/size/@aarongustafson/fullscreen-control?format=minzip&label=min%2Bgzip)](https://bundlejs.com/?q=@aarongustafson/fullscreen-control)
+[![License](https://img.shields.io/npm/l/@aarongustafson/fullscreen-control)](https://github.com/aarongustafson/fullscreen-control/blob/main/LICENSE)
+[![Type definitions](https://img.shields.io/npm/types/@aarongustafson/fullscreen-control)](https://github.com/aarongustafson/fullscreen-control/blob/main/fullscreen-control.d.ts)
 
 Adds a fullscreen button to the first video or iframe inside a light-DOM custom
 element. The media itself enters fullscreen; the host and button do not.

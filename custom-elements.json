@@ -36,7 +36,7 @@
 							"kind": "field",
 							"name": "target",
 							"type": { "text": "'media' | 'self'" },
-							"description": "Fullscreen the first nested video/iframe, or the host and all its contents. Changes during fullscreen apply after exit.",
+							"description": "Fullscreen the first nested video/iframe, or the host and all its contents. Changes during pending entry or fullscreen apply after entry fails or fullscreen exits.",
 							"attribute": "target",
 							"reflects": true,
 							"default": "'media'"
@@ -120,7 +120,7 @@
 							"name": "target",
 							"fieldName": "target",
 							"type": { "text": "'media' | 'self'" },
-							"description": "media (default, including missing/empty) targets the first video/iframe; self targets the host and its controls without modifying descendants. Unknown values warn and do not enhance. Changes during fullscreen apply after exit.",
+							"description": "media (default, including missing/empty) targets the first video/iframe; self targets the host and its controls without modifying descendants. Unknown values warn and do not enhance. Changes during pending entry or fullscreen apply after entry fails or fullscreen exits.",
 							"default": "'media'"
 						},
 						{

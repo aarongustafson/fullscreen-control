@@ -186,8 +186,9 @@ region without moving, cloning, or replacing authored content.
 `target` reflects the matching attribute. Missing or empty values use `"media"`,
 the existing first-video-or-iframe behavior. Only `"media"` and `"self"` are
 accepted; other values log a warning and do not create controls. A target change
-while fullscreen is active takes effect after exit so it doesn’t remove the
-Exit button.
+while fullscreen entry is pending or fullscreen is active is deferred so it
+doesn’t remove the Exit button. It takes effect after entry fails or fullscreen
+exits.
 
 In self mode, the button changes to the exit wording on an observed fullscreen
 transition. Entry from the button focuses that same button inside fullscreen;

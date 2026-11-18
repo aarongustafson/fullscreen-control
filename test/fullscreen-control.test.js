@@ -382,6 +382,76 @@ describe('FullscreenControlElement', () => {
 			expect(element.querySelectorAll('[role="status"]')).toHaveLength(1);
 		});
 
+		it('keeps the exit control when the target changes during pending entry', async () => {
+			const button = await setupWrapper();
+			const status = element.querySelector('[role="status"]');
+			element.appendChild(document.createElement('video'));
+			let resolveEntry;
+			element.requestFullscreen = vi.fn(
+				() => new Promise((resolve) => (resolveEntry = resolve)),
+			);
+			const entry = element.enterFullscreen();
+			element.target = 'media';
+			await waitForComponent();
+			expect(element.querySelector(':scope > button')).toBe(button);
+			expect(element.querySelector('[role="status"]')).toBe(status);
+
+			setFullscreenElement(element);
+			document.dispatchEvent(new Event('fullscreenchange'));
+			resolveEntry();
+			await entry;
+			await waitForComponent();
+			expect(button.textContent).toBe('Exit fullscreen');
+			document.exitFullscreen = vi.fn().mockResolvedValue(undefined);
+			await element.exitFullscreen();
+			expect(document.exitFullscreen).toHaveBeenCalledOnce();
+
+			setFullscreenElement(null);
+			document.dispatchEvent(new Event('fullscreenchange'));
+			await waitForComponent();
+			expect(element.querySelector('[role="status"]')).toBeNull();
+			expect(
+				element.querySelector('video').hasAttribute('controls'),
+			).toBe(true);
+		});
+
+		it('applies a deferred target change after pending entry fails', async () => {
+			const button = await setupWrapper();
+			element.appendChild(document.createElement('video'));
+			let rejectEntry;
+			element.requestFullscreen = vi.fn(
+				() => new Promise((resolve, reject) => (rejectEntry = reject)),
+			);
+			const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+			try {
+				const entry = element.enterFullscreen();
+				element.target = 'media';
+				await waitForComponent();
+				expect(element.querySelector(':scope > button')).toBe(button);
+				rejectEntry(new Error('Denied'));
+				await entry;
+				await waitForComponent();
+				expect(element.querySelector('[role="status"]')).toBeNull();
+				expect(
+					element.querySelector('video').hasAttribute('controls'),
+				).toBe(true);
+				expect(log).toHaveBeenCalled();
+			} finally {
+				log.mockRestore();
+			}
+		});
+
+		it('rechecks fullscreen before running a previously queued rebuild', async () => {
+			const button = await setupWrapper();
+			element.appendChild(document.createElement('video'));
+			element.target = 'media';
+			setFullscreenElement(element);
+			document.dispatchEvent(new Event('fullscreenchange'));
+			await waitForComponent();
+			expect(element.querySelector(':scope > button')).toBe(button);
+			expect(button.textContent).toBe('Exit fullscreen');
+		});
+
 		it('rejects unknown targets instead of falling back to media', async () => {
 			element.setAttribute('target', '#anything');
 			element.innerHTML = '<video></video>';

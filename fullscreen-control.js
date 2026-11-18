@@ -101,6 +101,8 @@ export class FullscreenControlElement extends HTMLElement {
 		this._pendingButtonUpdateUsesTimeout = false;
 		this._fullscreenChangeAbortController = null;
 		this._isFullscreenActive = false;
+		this._pendingEntryRequests = 0;
+		this._deferredSetup = false;
 		this._handleEscape = this._handleEscape.bind(this);
 		this._handleFullscreenChange = this._handleFullscreenChange.bind(this);
 		this._handleButtonClick = this._handleButtonClick.bind(this);
@@ -371,7 +373,8 @@ export class FullscreenControlElement extends HTMLElement {
 			}
 			if (
 				wasFullscreen &&
-				((this.target === 'self') !== (this._target === this) ||
+				(this._deferredSetup ||
+					(this.target === 'self') !== (this._target === this) ||
 					!['media', 'self'].includes(this.target))
 			) {
 				this._scheduleSetup();
@@ -422,6 +425,11 @@ export class FullscreenControlElement extends HTMLElement {
 	}
 
 	_initialize() {
+		if (this._pendingEntryRequests > 0 || this._isFullscreen()) {
+			this._deferredSetup = true;
+			return;
+		}
+		this._deferredSetup = false;
 		const restoreFocus = this._button === document.activeElement;
 		this._cleanup();
 		const didSetup = this._setup();
@@ -735,6 +743,7 @@ export class FullscreenControlElement extends HTMLElement {
 		}
 
 		this._clearError();
+		this._pendingEntryRequests += 1;
 		try {
 			if (this._target.requestFullscreen) {
 				await this._target.requestFullscreen();
@@ -747,6 +756,15 @@ export class FullscreenControlElement extends HTMLElement {
 			}
 		} catch (error) {
 			this._reportError('entering', error);
+		} finally {
+			this._pendingEntryRequests -= 1;
+			if (
+				this._pendingEntryRequests === 0 &&
+				this._deferredSetup &&
+				!this._isFullscreen()
+			) {
+				this._scheduleSetup();
+			}
 		}
 	}
 

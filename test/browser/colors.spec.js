@@ -823,7 +823,9 @@ for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
 		await expect(page.locator('.skip-link')).toBeFocused();
 		await page.keyboard.press('Enter');
 		await expect(page.locator('main')).toBeFocused();
-		const panels = page.locator('.code-demo-pair > micro-lighter');
+		const panels = page.locator(
+			'.code-demo-pair > :is(pre, micro-lighter)',
+		);
 		expect(await panels.count()).toBeGreaterThan(0);
 		for (const panel of await panels.all()) {
 			const text = await panel.locator('code').textContent();

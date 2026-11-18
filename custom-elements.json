@@ -7,7 +7,7 @@
 			"declarations": [
 				{
 					"kind": "class",
-					"description": "A web component to progressively enhance any video or iframe element to have fullscreen capabilities.",
+					"description": "Fullscreen controls for video, embedded content, or an authored wrapper.",
 					"name": "FullscreenControlElement",
 					"members": [
 						{
@@ -33,6 +33,42 @@
 							"default": "''"
 						},
 						{
+							"kind": "field",
+							"name": "target",
+							"type": { "text": "'media' | 'self'" },
+							"description": "Fullscreen the first nested video/iframe, or the host and all its contents. Changes during pending entry or fullscreen apply after entry fails or fullscreen exits.",
+							"attribute": "target",
+							"reflects": true,
+							"default": "'media'"
+						},
+						{
+							"kind": "field",
+							"name": "exitText",
+							"type": { "text": "string" },
+							"description": "Visible exit text in self mode. Supports {name}.",
+							"attribute": "exit-text",
+							"reflects": true,
+							"default": "'Exit fullscreen'"
+						},
+						{
+							"kind": "field",
+							"name": "exitLabel",
+							"type": { "text": "string" },
+							"description": "Optional exit button aria-label in self mode. Supports {name}.",
+							"attribute": "exit-label",
+							"reflects": true,
+							"default": "''"
+						},
+						{
+							"kind": "field",
+							"name": "errorText",
+							"type": { "text": "string" },
+							"description": "Visible plain-text failure message in the self-mode status region.",
+							"attribute": "error-text",
+							"reflects": true,
+							"default": "'Unable to change fullscreen. Try again or use the browser controls.'"
+						},
+						{
 							"kind": "method",
 							"name": "enterFullscreen",
 							"return": {
@@ -40,7 +76,7 @@
 									"text": "Promise<void>"
 								}
 							},
-							"description": "Requests fullscreen for the first nested video or iframe, not the host. Usually requires a user gesture. Failures are logged; the promise does not report success."
+							"description": "Requests fullscreen for the first nested video/iframe by default, or the host with target=self. Usually requires a user gesture. Failures are logged and shown in a localized status region in self mode; the promise does not report success."
 						},
 						{
 							"kind": "method",
@@ -69,17 +105,45 @@
 							"type": {
 								"text": "CustomEvent"
 							},
-							"description": "Fired on an observed transition into fullscreen for the media. Bubbles and is composed; detail is null."
+							"description": "Fired on an observed transition into fullscreen for the selected target. Bubbles and is composed; detail is null."
 						},
 						{
 							"name": "fullscreen-control:exit",
 							"type": {
 								"text": "CustomEvent"
 							},
-							"description": "Fired on an observed transition out of fullscreen for the media. Bubbles and is composed; detail is null."
+							"description": "Fired on an observed transition out of fullscreen for the selected target. Bubbles and is composed; detail is null."
 						}
 					],
 					"attributes": [
+						{
+							"name": "target",
+							"fieldName": "target",
+							"type": { "text": "'media' | 'self'" },
+							"description": "media (default, including missing/empty) targets the first video/iframe; self targets the host and its controls without modifying descendants. Unknown values warn and do not enhance. Changes during pending entry or fullscreen apply after entry fails or fullscreen exits.",
+							"default": "'media'"
+						},
+						{
+							"name": "exit-text",
+							"fieldName": "exitText",
+							"type": { "text": "string" },
+							"description": "Visible button text while the host is fullscreen in self mode. Supports the same {name} replacement as button-text, using the host name.",
+							"default": "'Exit fullscreen'"
+						},
+						{
+							"name": "exit-label",
+							"fieldName": "exitLabel",
+							"type": { "text": "string" },
+							"description": "Optional exit aria-label in self mode. Supports {name}. Empty or identical resolved labels omit aria-label.",
+							"default": "''"
+						},
+						{
+							"name": "error-text",
+							"fieldName": "errorText",
+							"type": { "text": "string" },
+							"description": "Visible plain-text message in a generated role=status region after self-mode entry or exit fails, including unavailable APIs. Cleared on the next attempt.",
+							"default": "'Unable to change fullscreen. Try again or use the browser controls.'"
+						},
 						{
 							"name": "button-text",
 							"fieldName": "buttonText",

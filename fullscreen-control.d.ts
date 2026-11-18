@@ -10,6 +10,14 @@ export class FullscreenControlElement extends HTMLElement {
 	buttonText: string;
 	/** Optional aria-label text. Supports the `{name}` token. */
 	buttonLabel: string;
+	/** Fullscreen the first video/iframe (default), or the wrapper and its controls. */
+	target: 'media' | 'self';
+	/** Visible exit text in self mode. Supports the `{name}` token. */
+	exitText: string;
+	/** Optional exit aria-label in self mode. Supports the `{name}` token. */
+	exitLabel: string;
+	/** Visible failure feedback in self mode; inserted as plain text. */
+	errorText: string;
 
 	/** Programmatically enters fullscreen mode. */
 	enterFullscreen(): Promise<void>;

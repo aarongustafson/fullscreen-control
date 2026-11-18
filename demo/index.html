@@ -4,41 +4,86 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Fullscreen Control Web Component Demo</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/microlighter@2.2.0/dist/themes/github.css"
+		/>
 		<link rel="stylesheet" href="./styles.css" />
 	</head>
-	<body>
+	<body data-syntax-theme="github">
+		<a class="skip-link" href="#main">Skip to examples</a>
 		<header>
-			<h1>Fullscreen Control Web Component Demo</h1>
-			<p>
-				Fullscreen controls for video and embedded content. See the
+			<p class="eyebrow">Small component. More room.</p>
+			<h1>&lt;fullscreen-control&gt;</h1>
+			<p class="lede">
+				Give your content the whole screen. Keep the useful bits close
+				at hand.
+			</p>
+			<p class="header-description">
+				Progressive fullscreen controls for video, embedded content, and
+				code. Native content first. Light DOM throughout.
+			</p>
+			<nav aria-label="Component resources">
 				<a
 					href="https://github.com/aarongustafson/fullscreen-control/blob/main/README.md"
-					>README</a
+					>Read the README</a
 				>
-				for installation and API documentation.
-			</p>
+				<a href="https://github.com/aarongustafson/fullscreen-control"
+					>View on GitHub</a
+				>
+				<a href="./esm.html">esm.sh example</a>
+				<a href="./unpkg.html">unpkg example</a>
+			</nav>
 		</header>
-		<main>
-			<p>
-				Use the fullscreen button, then Escape or the browser’s
-				fullscreen controls to return. Buttons overlay the top-right of
-				the media. With enlarged labels, the demo’s media area grows to
-				keep the overlay inside it and clear of native playback
-				controls.
-			</p>
-			<p>
-				Before JavaScript loads, or if enhancement fails, videos retain
-				native controls and the embedded presentation stays readable.
-				Browser permissions and support can limit fullscreen. Follow the
-				sample link if playback fails.
-			</p>
-			<noscript
-				><p>
-					JavaScript is off. Native media controls and the
-					presentation still work; the extra fullscreen buttons are
-					not added.
-				</p></noscript
-			>
+		<main id="main" tabindex="-1">
+			<div class="intro">
+				<h2>Start with content. Add a little space.</h2>
+				<p>
+					Use the fullscreen button, then Escape or the browser’s
+					fullscreen controls to return. Every example pairs the
+					markup with something you can try.
+				</p>
+				<details>
+					<summary>
+						Code controls, highlighting, and fallbacks
+					</summary>
+					<p class="code-help">
+						Each example pairs the code with a working demo. Syntax
+						colors help distinguish tags, attributes, and values.
+						Copy includes the whole snippet. If copying is blocked,
+						select the code and copy it manually.
+					</p>
+					<p class="code-help">
+						This is a design pilot using
+						<a href="https://github.com/davatron5000/microlighter"
+							>MicroLighter</a
+						>
+						2.2.0 for syntax highlighting, Copy, and optional line
+						numbers. The original code stays readable and selectable
+						if the enhancement cannot load.
+					</p>
+					<p>
+						Before JavaScript loads, or if enhancement fails, videos
+						retain native controls and the embedded presentation
+						stays readable. Browser permissions and support can
+						limit fullscreen. Follow the sample link if playback
+						fails.
+					</p>
+				</details>
+				<p
+					id="microlighter-status"
+					class="enhancement-status"
+					role="status"
+					hidden
+				></p>
+				<noscript
+					><p>
+						JavaScript is off. Native media controls and the
+						presentation still work; the extra fullscreen buttons
+						are not added.
+					</p></noscript
+				>
+			</div>
 			<section class="demo-section">
 				<h2>Video with native controls</h2>
 				<p>
@@ -46,36 +91,42 @@
 					fallback. This local, silent clip has no speech or audio.
 				</p>
 				<div class="code-demo-pair">
-					<pre
-						tabindex="0"
-						aria-label="Video example code"
-					><code><mark>&lt;fullscreen-control&gt;</mark>
-  &lt;video src="./sample.webm" controls
+					<micro-lighter
+						class="code-panel"
+						language="html"
+						controls="copy"
+						data-label="HTML"
+					>
+						<pre
+							tabindex="0"
+							aria-label="Video example code"
+						><code>&lt;fullscreen-control&gt;
+  &lt;video src="./sample.mp4" controls
     width="320" height="180"
     aria-label="Moving circle"&gt;
-    &lt;a href="./sample.webm"&gt;Open the sample clip&lt;/a&gt;
+    &lt;a href="./sample.mp4"&gt;Open the sample clip&lt;/a&gt;
   &lt;/video&gt;
-<mark>&lt;/fullscreen-control&gt;</mark>
+&lt;/fullscreen-control&gt;
 &lt;p&gt;Silent clip: a circle moves left to right
   across a rectangle; no audio.&lt;/p&gt;</code></pre>
+					</micro-lighter>
 					<div class="demo">
 						<fullscreen-control>
 							<video
-								src="./sample.webm"
+								src="./sample.mp4"
 								controls
 								preload="metadata"
 								width="320"
 								height="180"
 								aria-label="Moving circle"
 							>
-								<a href="./sample.webm">Open the sample clip</a
-								>.
+								<a href="./sample.mp4">Open the sample clip</a>.
 							</video>
 						</fullscreen-control>
 						<p>
 							Silent clip: a circle moves left to right across a
 							rectangle; no audio.
-							<a href="./sample.webm">Open the sample clip</a>.
+							<a href="./sample.mp4">Open the sample clip</a>.
 						</p>
 					</div>
 				</div>
@@ -89,16 +140,23 @@
 					direct link.
 				</p>
 				<div class="code-demo-pair">
-					<pre
-						tabindex="0"
-						aria-label="Iframe example code"
-					><code><mark>&lt;fullscreen-control id="iframe-demo"&gt;</mark>
+					<micro-lighter
+						class="code-panel"
+						language="html"
+						controls="copy"
+						data-label="HTML"
+					>
+						<pre
+							tabindex="0"
+							aria-label="Iframe example code"
+						><code>&lt;fullscreen-control id="iframe-demo"&gt;
   &lt;iframe src="./frame.html"
     title="Product presentation"
     width="320" height="180"
     allow="fullscreen" allowfullscreen&gt;&lt;/iframe&gt;
-<mark>&lt;/fullscreen-control&gt;</mark>
+&lt;/fullscreen-control&gt;
 &lt;a href="./frame.html"&gt;Read the presentation&lt;/a&gt;</code></pre>
+					</micro-lighter>
 					<div class="demo">
 						<fullscreen-control id="iframe-demo">
 							<iframe
@@ -125,18 +183,25 @@
 					accessible name.
 				</p>
 				<div class="code-demo-pair">
-					<pre
-						tabindex="0"
-						aria-label="Japanese example code"
-					><code><mark>&lt;fullscreen-control lang="ja"
-  button-text="全画面表示"&gt;</mark>
-  &lt;video src="./sample.webm" controls
+					<micro-lighter
+						class="code-panel"
+						language="html"
+						controls="copy"
+						data-label="HTML"
+					>
+						<pre
+							tabindex="0"
+							aria-label="Japanese example code"
+						><code>&lt;fullscreen-control lang="ja"
+  button-text="全画面表示"&gt;
+  &lt;video src="./sample.mp4" controls
     aria-label="円の動き"&gt;&lt;/video&gt;
-<mark>&lt;/fullscreen-control&gt;</mark></code></pre>
-					<div class="demo" lang="ja">
+&lt;/fullscreen-control&gt;</code></pre>
+					</micro-lighter>
+					<div class="demo">
 						<fullscreen-control lang="ja" button-text="全画面表示">
 							<video
-								src="./sample.webm"
+								src="./sample.mp4"
 								controls
 								preload="none"
 								width="320"
@@ -144,7 +209,7 @@
 								aria-label="円の動き"
 							></video>
 						</fullscreen-control>
-						<p>
+						<p lang="ja">
 							音声のない動画：四角形の中を円が左から右へ移動します。
 						</p>
 					</div>
@@ -163,21 +228,28 @@
 					wording in the accessible name to support speech input.
 				</p>
 				<div class="code-demo-pair">
-					<pre
-						tabindex="0"
-						aria-label="Named media example code"
-					><code><mark>&lt;fullscreen-control
-  button-text="View {name} fullscreen"&gt;</mark>
-  &lt;video src="./sample.webm" controls
+					<micro-lighter
+						class="code-panel"
+						language="html"
+						controls="copy"
+						data-label="HTML"
+					>
+						<pre
+							tabindex="0"
+							aria-label="Named media example code"
+						><code>&lt;fullscreen-control
+  button-text="View {name} fullscreen"&gt;
+  &lt;video src="./sample.mp4" controls
     aria-label="Moving circle"&gt;&lt;/video&gt;
-<mark>&lt;/fullscreen-control&gt;</mark></code></pre>
+&lt;/fullscreen-control&gt;</code></pre>
+					</micro-lighter>
 					<div class="demo">
 						<fullscreen-control
 							id="named-demo"
 							button-text="View {name} fullscreen"
 						>
 							<video
-								src="./sample.webm"
+								src="./sample.mp4"
 								controls
 								preload="none"
 								width="320"
@@ -202,17 +274,24 @@
 					arrow character. The native focus ring remains.
 				</p>
 				<div class="code-demo-pair">
-					<pre
-						tabindex="0"
-						aria-label="Icon-only button example code"
-					><code>&lt;div class="demo"&gt;
-<mark>&lt;fullscreen-control class="icon-only"
+					<micro-lighter
+						class="code-panel"
+						language="html"
+						controls="copy"
+						data-label="HTML + CSS"
+						line-numbers
+					>
+						<pre
+							tabindex="0"
+							aria-label="Icon-only button example code"
+						><code>&lt;div class="demo"&gt;
+&lt;fullscreen-control class="icon-only"
   button-text="⤢"
-  button-label="View {name} fullscreen"&gt;</mark>
-  &lt;video src="./sample.webm" controls
+  button-label="View {name} fullscreen"&gt;
+  &lt;video src="./sample.mp4" controls
     width="320" height="180"
     aria-label="Moving circle"&gt;&lt;/video&gt;
-<mark>&lt;/fullscreen-control&gt;</mark>
+&lt;/fullscreen-control&gt;
 &lt;/div&gt;
 
 &lt;style&gt;
@@ -223,6 +302,7 @@
   line-height: 1;
 }
 &lt;/style&gt;</code></pre>
+					</micro-lighter>
 					<div class="demo">
 						<fullscreen-control
 							class="icon-only"
@@ -230,7 +310,7 @@
 							button-label="View {name} fullscreen"
 						>
 							<video
-								src="./sample.webm"
+								src="./sample.mp4"
 								controls
 								preload="none"
 								width="320"
@@ -246,6 +326,97 @@
 					</div>
 				</div>
 			</section>
+			<section class="demo-section" id="microlighter-example">
+				<h2>Code and controls together with MicroLighter</h2>
+				<p>
+					Set <code>target="self"</code> to fullscreen the wrapper,
+					not a nested media element. Its button stays available and
+					changes to <code>exit-text</code> (default: “Exit
+					fullscreen”). Use <code>exit-label</code> for a separate
+					accessible name and <code>error-text</code> for localized
+					failure feedback. Without this opt-in, media behavior stays
+					the same.
+				</p>
+				<p>
+					<a href="https://github.com/davatron5000/microlighter"
+						>MicroLighter</a
+					>
+					provides the syntax highlighting, Copy button, and line
+					numbers. Both components enhance the original code without
+					replacing its text nodes. The example pins MicroLighter
+					2.2.0 from jsDelivr; it isn’t a runtime dependency of
+					fullscreen-control.
+				</p>
+				<div class="code-demo-pair">
+					<micro-lighter
+						class="code-panel"
+						language="html"
+						controls="copy"
+						data-label="HTML + JavaScript"
+						line-numbers
+					>
+						<pre
+							tabindex="0"
+							aria-label="MicroLighter composition example code"
+						><code>&lt;link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/microlighter@2.2.0/dist/themes/github.css"&gt;
+&lt;script type="module"
+  src="https://cdn.jsdelivr.net/npm/microlighter@2.2.0/dist/micro-lighter-element.min.js"&gt;&lt;/script&gt;
+&lt;script type="module" src="../define.js"&gt;&lt;/script&gt;
+
+&lt;fullscreen-control target="self"
+  aria-label="Greeting example"&gt;
+  &lt;micro-lighter language="javascript"
+    controls="copy" line-numbers
+    data-syntax-theme="github"&gt;
+    &lt;pre tabindex="0" aria-label="Greeting code"&gt;&lt;code&gt;function greet(name) {
+  return `Hello, ${name}!`;
+}
+
+console.log(greet("world"));&lt;/code&gt;&lt;/pre&gt;
+  &lt;/micro-lighter&gt;
+&lt;/fullscreen-control&gt;</code></pre>
+					</micro-lighter>
+					<div class="demo">
+						<fullscreen-control
+							id="code-demo"
+							target="self"
+							aria-label="Greeting example"
+						>
+							<micro-lighter
+								language="javascript"
+								controls="copy"
+								line-numbers
+								data-syntax-theme="github"
+								data-label="JavaScript"
+							>
+								<pre
+									tabindex="0"
+									aria-label="Greeting code"
+								><code>function greet(name) {
+  return `Hello, ${name}!`;
+}
+
+console.log(greet("world"));</code></pre>
+							</micro-lighter>
+						</fullscreen-control>
+						<p>
+							Copy uses MicroLighter’s clipboard behavior and
+							English labels. If clipboard access is blocked,
+							select the code and copy it manually. Use Tab to
+							reach Copy and the fullscreen button; Escape or Exit
+							fullscreen returns to this page.
+						</p>
+						<noscript
+							><p>
+								JavaScript is off. The code remains readable and
+								selectable without highlighting, line numbers,
+								or added controls.
+							</p></noscript
+						>
+					</div>
+				</div>
+			</section>
 			<section class="demo-section">
 				<h2>Fullscreen events</h2>
 				<p>
@@ -256,24 +427,32 @@
 					affect browser feedback.
 				</p>
 				<div class="code-demo-pair">
-					<pre
-						tabindex="0"
-						aria-label="Event example code"
-					><code><mark>&lt;fullscreen-control id="event-demo"&gt;</mark>
-  &lt;video src="./sample.webm" controls
+					<micro-lighter
+						class="code-panel"
+						language="html"
+						controls="copy"
+						data-label="HTML + JavaScript"
+						line-numbers
+					>
+						<pre
+							tabindex="0"
+							aria-label="Event example code"
+						><code>&lt;fullscreen-control id="event-demo"&gt;
+  &lt;video src="./sample.mp4" controls
     aria-label="Moving circle"&gt;&lt;/video&gt;
-<mark>&lt;/fullscreen-control&gt;</mark>
+&lt;/fullscreen-control&gt;
 &lt;script&gt;
   const media = document.querySelector('#event-demo');
-  media.addEventListener(<mark>'fullscreen-control:enter'</mark>,
+  media.addEventListener('fullscreen-control:enter',
     () =&gt; console.log('Entered fullscreen'));
-  media.addEventListener(<mark>'fullscreen-control:exit'</mark>,
+  media.addEventListener('fullscreen-control:exit',
     () =&gt; console.log('Exited fullscreen'));
 &lt;/script&gt;</code></pre>
+					</micro-lighter>
 					<div class="demo">
 						<fullscreen-control id="event-demo">
 							<video
-								src="./sample.webm"
+								src="./sample.mp4"
 								controls
 								preload="none"
 								width="320"
@@ -301,10 +480,16 @@
 					background when adapting it.
 				</p>
 				<div class="code-demo-pair">
-					<pre
-						tabindex="0"
-						aria-label="Custom styling example code"
-					><code>.demo .custom-style &gt; button {
+					<micro-lighter
+						class="code-panel"
+						language="css"
+						controls="copy"
+						data-label="CSS"
+					>
+						<pre
+							tabindex="0"
+							aria-label="Custom styling example code"
+						><code>.demo .custom-style &gt; button {
   background: #a63232;
   color: #ffffff;
   border: 1px solid currentColor;
@@ -314,10 +499,11 @@
 .demo .custom-style &gt; button:hover {
   background: #8d2828;
 }</code></pre>
+					</micro-lighter>
 					<div class="demo">
 						<fullscreen-control class="custom-style">
 							<video
-								src="./sample.webm"
+								src="./sample.mp4"
 								controls
 								preload="none"
 								width="320"
@@ -335,11 +521,12 @@
 			<section class="api-reference">
 				<h2>API and browser limits</h2>
 				<p>
-					The light-DOM button controls the first nested video or
-					iframe. Only the media enters fullscreen, not the
-					surrounding component or this button. When entry came from
-					the button, an observed exit returns focus to it.
-					Programmatic entry does not request that focus return.
+					By default, the light-DOM button controls the first nested
+					video or iframe, and only that media enters fullscreen. With
+					<code>target="self"</code>, the wrapper and its controls
+					enter fullscreen together. When entry came from the button,
+					an observed exit returns focus to it. Programmatic entry
+					does not request that focus return.
 				</p>
 				<p>
 					Use <code>buttonText</code> and <code>buttonLabel</code> or
@@ -360,10 +547,12 @@
 					the media area can grow with enlarged labels.
 				</p>
 				<p>
-					Fullscreen failures are logged to the console, not shown by
-					the component. Keep the media and direct links usable, and
-					provide localized recovery instructions in your application.
-					See the
+					Fullscreen failures are logged to the console. Self mode
+					also shows <code>error-text</code> in a status region,
+					leaving the content and retry button available. No CSS
+					“fullscreen” substitute is applied. Keep the media and
+					direct links usable, and provide localized recovery
+					instructions for the default media mode. See the
 					<a
 						href="https://github.com/aarongustafson/fullscreen-control/blob/main/README.md"
 						>README</a
@@ -383,6 +572,7 @@
 			</p>
 		</footer>
 		<script src="../define.js" type="module"></script>
+		<script type="module" src="./demo.js"></script>
 		<script type="module">
 			const eventDemo = document.getElementById('event-demo');
 			const eventLogContent =

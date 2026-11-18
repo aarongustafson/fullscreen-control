@@ -110,6 +110,20 @@ async function measurements(locator) {
 }
 
 async function demo(page, name = 'index.html') {
+	await page.route(
+		'https://cdn.jsdelivr.net/npm/microlighter@2.2.0/dist/**',
+		async (route) => {
+			const path = new URL(route.request().url()).pathname.split(
+				'/dist/',
+			)[1];
+			await route.fulfill({
+				contentType: path.endsWith('.css')
+					? 'text/css'
+					: 'text/javascript',
+				body: await read(`node_modules/microlighter/dist/${path}`),
+			});
+		},
+	);
 	await page.route('https://esm.sh/**', (route) =>
 		route.fulfill({ contentType: 'text/javascript', body: source }),
 	);
@@ -135,7 +149,141 @@ async function demo(page, name = 'index.html') {
 	await expect(
 		page.locator('fullscreen-control > button').first(),
 	).toBeVisible();
+	await expect(
+		page.locator('micro-lighter').first().getByRole('button'),
+	).toBeVisible();
 }
+
+test('MicroLighter copy and highlighting survive keyboard-operated wrapper fullscreen', async ({
+	page,
+	browserName,
+}) => {
+	await page.addInitScript(() => {
+		Object.defineProperty(navigator, 'clipboard', {
+			configurable: true,
+			value: {
+				writeText: async (text) => {
+					document.documentElement.dataset.copied = text;
+				},
+			},
+		});
+	});
+	await demo(page);
+	const host = page.locator('#code-demo');
+	const lighter = host.locator('micro-lighter');
+	const copy = lighter.getByRole('button', { name: 'Copy', exact: true });
+	const button = host.locator(':scope > button');
+	const code = lighter.locator('code');
+	await expect(copy).toBeVisible();
+	const text = await code.textContent();
+	await code.evaluate((code) => {
+		const range = document.createRange();
+		range.selectNodeContents(code);
+		CSS.highlights.set('composition-test', new Highlight(range));
+	});
+	const originalNode = await code.evaluateHandle((code) => code.firstChild);
+	expect(
+		await copy.evaluate((button) => getComputedStyle(button).position),
+	).toBe('relative');
+	await expect
+		.poll(() => page.evaluate(() => CSS.highlights.has('keyword')))
+		.toBe(true);
+
+	if (await page.evaluate(() => document.fullscreenEnabled)) {
+		await button.focus();
+		await page.keyboard.press('Enter');
+		await expect
+			.poll(() => page.evaluate(() => document.fullscreenElement?.id))
+			.toBe('code-demo');
+		await expect(button).toHaveAccessibleName('Exit fullscreen');
+		await expect(button).toBeFocused();
+		await expect(copy).toBeVisible();
+		await page.keyboard.press(
+			browserName === 'webkit' ? 'Alt+Shift+Tab' : 'Shift+Tab',
+		);
+		await expect(copy).toBeFocused();
+		await page.keyboard.press('Enter');
+		await expect(page.locator('html')).toHaveAttribute('data-copied', text);
+		await page.keyboard.press(browserName === 'webkit' ? 'Alt+Tab' : 'Tab');
+		await expect(button).toBeFocused();
+		await page.keyboard.press('Enter');
+		await expect
+			.poll(() =>
+				page.evaluate(() => document.fullscreenElement === null),
+			)
+			.toBe(true);
+		await expect(button).toHaveAccessibleName('View fullscreen');
+		await expect(button).toBeFocused();
+		await button.press('Enter');
+		await expect
+			.poll(() => page.evaluate(() => document.fullscreenElement?.id))
+			.toBe('code-demo');
+		await page.keyboard.press('Escape');
+		await expect
+			.poll(() =>
+				page.evaluate(() => document.fullscreenElement === null),
+			)
+			.toBe(true);
+		await expect(button).toBeFocused();
+	} else {
+		await copy.click();
+		await expect(page.locator('html')).toHaveAttribute('data-copied', text);
+	}
+	expect(
+		await code.evaluate(
+			(code, node) => code.firstChild === node,
+			originalNode,
+		),
+	).toBe(true);
+	expect(
+		await page.evaluate(() =>
+			[...CSS.highlights.get('composition-test')][0].toString(),
+		),
+	).toBe(text);
+});
+
+test('wrapper mode visibly reports rejection, keeps retry available, and preserves code', async ({
+	page,
+}) => {
+	await demo(page);
+	const host = page.locator('#code-demo');
+	await host.evaluate((host) => {
+		host.setAttribute(
+			'error-text',
+			'Fullscreen blocked. Read the code here.',
+		);
+		host.requestFullscreen = () =>
+			Promise.reject(new DOMException('Denied', 'NotAllowedError'));
+	});
+	const text = await host.locator('code').textContent();
+	const button = host.locator(':scope > button');
+	await button.focus();
+	await page.keyboard.press('Enter');
+	await expect(host.getByRole('status')).toHaveText(
+		'Fullscreen blocked. Read the code here.',
+	);
+	await expect(button).toBeEnabled();
+	await expect(button).toBeFocused();
+	await expect(host.locator('code')).toHaveText(text);
+	await expect(button).toHaveAccessibleName('View fullscreen');
+});
+
+test('MicroLighter network failure leaves readable code and working fullscreen enhancement', async ({
+	page,
+}) => {
+	await page.route('https://cdn.jsdelivr.net/**', (route) => route.abort());
+	await page.goto('/demo/index.html');
+	const host = page.locator('#code-demo');
+	await expect(page.locator('#microlighter-status')).toContainText(
+		'could not load',
+	);
+	await expect(page.locator('#microlighter-status')).toBeVisible();
+	await expect(host.locator('pre')).toBeVisible();
+	await expect(host.locator(':scope > button')).toBeVisible();
+	await expect(host.locator('micro-lighter').getByRole('button')).toHaveCount(
+		0,
+	);
+});
 
 test('palette replacement calibrates mixed-case and normalized CSSOM colors', async ({
 	page,
@@ -204,11 +352,20 @@ for (const colorScheme of ['light', 'dark']) {
 			'.event-log',
 			'.event-log .event',
 			'footer',
+			'.eyebrow',
 		]) {
 			expect(
 				(await measurements(page.locator(selector).first())).text,
 				selector,
 			).toBeGreaterThanOrEqual(4.5);
+		}
+		for (const button of await page
+			.locator('micro-lighter')
+			.getByRole('button')
+			.all()) {
+			expect((await measurements(button)).text).toBeGreaterThanOrEqual(
+				4.5,
+			);
 		}
 	});
 	test(`${colorScheme}: native button palette is measured separately`, async ({
@@ -299,13 +456,14 @@ test('all study palettes retain text and necessary button-boundary contrast', as
 test('fixture server supports native media byte-range requests', async ({
 	request,
 }) => {
-	const response = await request.get('/demo/sample.webm', {
+	const response = await request.get('/demo/sample.mp4', {
 		headers: { Range: 'bytes=0-1' },
 	});
 	expect(response.status()).toBe(206);
 	expect(response.headers()['content-range']).toMatch(/^bytes 0-1\/\d+$/);
-	expect([...(await response.body())]).toEqual([0x1a, 0x45]);
-	const invalid = await request.get('/demo/sample.webm', {
+	expect(response.headers()['content-type']).toBe('video/mp4');
+	expect([...(await response.body())]).toEqual([0x00, 0x00]);
+	const invalid = await request.get('/demo/sample.mp4', {
 		headers: { Range: 'bytes=999999999-' },
 	});
 	expect(invalid.status()).toBe(416);
@@ -636,6 +794,52 @@ test('forced colors and increased contrast preserve native focus and full-streng
 });
 
 for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
+	test(`${name}: all code panels highlight HTML and copy exact text without line numbers`, async ({
+		page,
+		browserName,
+	}) => {
+		await page.addInitScript(() => {
+			Object.defineProperty(navigator, 'clipboard', {
+				configurable: true,
+				value: {
+					writeText: async (text) => {
+						document.documentElement.dataset.copied = text;
+					},
+				},
+			});
+		});
+		await demo(page, name);
+		await expect
+			.poll(() =>
+				page.evaluate(() => {
+					const code = document.querySelector('.code-panel code');
+					return [...(CSS.highlights.get('tag') || [])].some(
+						(range) => code.contains(range.startContainer),
+					);
+				}),
+			)
+			.toBe(true);
+		await page.keyboard.press(browserName === 'webkit' ? 'Alt+Tab' : 'Tab');
+		await expect(page.locator('.skip-link')).toBeFocused();
+		await page.keyboard.press('Enter');
+		await expect(page.locator('main')).toBeFocused();
+		const panels = page.locator('.code-demo-pair > micro-lighter');
+		expect(await panels.count()).toBeGreaterThan(0);
+		for (const panel of await panels.all()) {
+			const text = await panel.locator('code').textContent();
+			await panel
+				.getByRole('button', { name: 'Copy', exact: true })
+				.click();
+			await expect(page.locator('html')).toHaveAttribute(
+				'data-copied',
+				text,
+			);
+			await expect(
+				panel.getByRole('button', { name: 'Copied', exact: true }),
+			).toBeVisible();
+		}
+	});
+
 	test(`${name}: code/live pairs and controls reflow at wide and narrow enlarged text`, async ({
 		page,
 	}) => {
@@ -657,9 +861,12 @@ for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
 				const geometry = await button.evaluate((button) => {
 					const box = button.getBoundingClientRect();
 					const media = button.parentElement
-						.querySelector('video, iframe')
+						.querySelector('video, iframe, micro-lighter')
 						.getBoundingClientRect();
 					return {
+						isWrapper:
+							button.parentElement.getAttribute('target') ===
+							'self',
 						left: box.left,
 						right: box.right,
 						height: box.height,
@@ -683,11 +890,17 @@ for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
 				expect(geometry.right).toBeLessThanOrEqual(width);
 				expect(geometry.height).toBeGreaterThanOrEqual(44);
 				expect(geometry.hit).toBe(true);
-				expect(geometry.topOffset).toBeCloseTo(geometry.inset, 1);
-				expect(geometry.endOffset).toBeCloseTo(geometry.inset, 1);
-				expect(geometry.bottomGap).toBeGreaterThanOrEqual(
-					geometry.inset * 6 - 1,
-				);
+				if (geometry.isWrapper) {
+					expect(geometry.bottomGap).toBeLessThanOrEqual(
+						-geometry.height,
+					);
+				} else {
+					expect(geometry.topOffset).toBeCloseTo(geometry.inset, 1);
+					expect(geometry.endOffset).toBeCloseTo(geometry.inset, 1);
+					expect(geometry.bottomGap).toBeGreaterThanOrEqual(
+						geometry.inset * 6 - 1,
+					);
+				}
 			}
 		}
 		await page.setViewportSize({ width: 1400, height: 900 });
@@ -695,7 +908,9 @@ for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
 			document.documentElement.style.fontSize = '';
 		});
 		for (const pair of await page.locator('.code-demo-pair').all()) {
-			const code = await pair.locator('pre').boundingBox();
+			const code = await pair
+				.locator(':scope > micro-lighter')
+				.boundingBox();
 			const live = await pair.locator('.demo').boundingBox();
 			expect(code.x + code.width).toBeLessThanOrEqual(live.x);
 		}
@@ -719,6 +934,17 @@ for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
 			await expect(
 				page.getByText('Silent clip:', { exact: false }).first(),
 			).toBeVisible();
+			if (name === 'index.html') {
+				await expect(page.locator('#code-demo pre')).toBeVisible();
+				if (failure === 'no JavaScript')
+					await expect(
+						page.locator('#microlighter-status'),
+					).toBeHidden();
+			}
+			for (const code of await page.locator('.code-panel pre').all()) {
+				await expect(code).toBeVisible();
+				await expect(code).toHaveAttribute('tabindex', '0');
+			}
 			await context.close();
 		});
 	}

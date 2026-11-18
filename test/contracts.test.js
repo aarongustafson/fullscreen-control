@@ -43,6 +43,10 @@ it('describes the real light-DOM API and guarded registration', async () => {
 	for (const [attribute, property] of [
 		['button-text', 'buttonText'],
 		['button-label', 'buttonLabel'],
+		['target', 'target'],
+		['exit-text', 'exitText'],
+		['exit-label', 'exitLabel'],
+		['error-text', 'errorText'],
 	]) {
 		expect(
 			component.attributes.find((entry) => entry.name === attribute)

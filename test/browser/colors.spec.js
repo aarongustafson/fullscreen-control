@@ -493,12 +493,24 @@ test('local silent video decodes and plays to completion without autoplay', asyn
 	await page
 		.getByRole('button', { name: 'Play test clip', exact: true })
 		.click();
+	await expect(video).toBeInViewport({ ratio: 1 });
 	await expect
 		.poll(() => video.evaluate((video) => video.currentTime))
 		.toBeGreaterThan(0);
 	await expect
-		.poll(() => video.evaluate((video) => video.ended), { timeout: 10000 })
-		.toBe(true);
+		.poll(
+			() =>
+				video.evaluate((video) => ({
+					ended: video.ended,
+					currentTime: video.currentTime,
+					duration: video.duration,
+					paused: video.paused,
+					readyState: video.readyState,
+					error: video.error?.message ?? null,
+				})),
+			{ timeout: 10000 },
+		)
+		.toMatchObject({ ended: true });
 });
 
 test('class-only imports preserve manual registration and default positioning hooks', async ({

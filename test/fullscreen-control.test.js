@@ -251,6 +251,150 @@ describe('FullscreenControlElement', () => {
 		});
 	});
 
+	describe('wrapper fullscreen', () => {
+		const setupWrapper = async () => {
+			element.setAttribute('target', 'self');
+			element.setAttribute('aria-label', 'Code sample');
+			element.innerHTML =
+				'<micro-lighter><pre><code>const answer = 42;\n</code></pre><button type="button">Copy</button></micro-lighter>';
+			await reconnectElement();
+			return element.querySelector(':scope > button');
+		};
+
+		it('fullscreens the host without replacing code nodes or changing nested controls', async () => {
+			const button = await setupWrapper();
+			const code = element.querySelector('code');
+			const text = code.firstChild;
+			const copy = element.querySelector('micro-lighter button');
+			const request = vi.fn().mockResolvedValue(undefined);
+			element.requestFullscreen = request;
+
+			expect(button).not.toBeNull();
+			expect(button.getAttribute('aria-controls')).toBe(element.id);
+			button.click();
+			await Promise.resolve();
+			expect(request).toHaveBeenCalledOnce();
+			setFullscreenElement(element);
+			document.dispatchEvent(new Event('fullscreenchange'));
+			expect(button.textContent).toBe('Exit fullscreen');
+			expect(button.hasAttribute('aria-label')).toBe(false);
+			expect(document.activeElement).toBe(button);
+
+			const extra = document.createElement('video');
+			element.appendChild(extra);
+			await waitForComponent();
+			expect(element.querySelector(':scope > button')).toBe(button);
+			expect(extra.hasAttribute('controls')).toBe(false);
+			expect(code.firstChild).toBe(text);
+			expect(code.textContent).toBe('const answer = 42;\n');
+			expect(copy.textContent).toBe('Copy');
+
+			setFullscreenElement(null);
+			document.dispatchEvent(new Event('fullscreenchange'));
+			expect(button.textContent).toBe('View fullscreen');
+			expect(document.activeElement).toBe(button);
+		});
+
+		it('localizes entry, exit, and failure feedback and permits a retry', async () => {
+			const button = await setupWrapper();
+			element.buttonText = 'Ouvrir';
+			element.buttonLabel = 'Ouvrir {name}';
+			element.exitText = 'Quitter';
+			element.exitLabel = 'Quitter {name}';
+			element.errorText = 'Impossible de changer de mode.';
+			const error = new Error('Permission denied');
+			const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+			element.requestFullscreen = vi.fn().mockRejectedValue(error);
+
+			await element.enterFullscreen();
+			const status = element.querySelector('[role="status"]');
+			expect(status.textContent).toBe('Impossible de changer de mode.');
+			expect(button.textContent).toBe('Ouvrir');
+			expect(button.disabled).toBe(false);
+
+			element.requestFullscreen.mockResolvedValue(undefined);
+			await element.enterFullscreen();
+			expect(status.textContent).toBe('');
+			expect(button.textContent).toBe('Ouvrir');
+			setFullscreenElement(element);
+			document.dispatchEvent(new Event('fullscreenchange'));
+			expect(button.textContent).toBe('Quitter');
+			expect(button.getAttribute('aria-label')).toBe(
+				'Quitter Code sample',
+			);
+
+			document.exitFullscreen = vi.fn().mockRejectedValue(error);
+			await element.exitFullscreen();
+			expect(status.textContent).toBe('Impossible de changer de mode.');
+			expect(button.textContent).toBe('Quitter');
+			log.mockRestore();
+		});
+
+		it('reports unavailable fullscreen without changing the authored content', async () => {
+			await setupWrapper();
+			element.requestFullscreen = undefined;
+			element.webkitRequestFullscreen = undefined;
+			element.mozRequestFullScreen = undefined;
+			const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+			await element.enterFullscreen();
+			expect(element.querySelector('[role="status"]').textContent).toBe(
+				'Unable to change fullscreen. Try again or use the browser controls.',
+			);
+			expect(element.querySelector('code').textContent).toBe(
+				'const answer = 42;\n',
+			);
+			log.mockRestore();
+		});
+
+		it('defers target changes until fullscreen exits and cleans up on reconnect', async () => {
+			const button = await setupWrapper();
+			button.focus();
+			setFullscreenElement(element);
+			document.dispatchEvent(new Event('fullscreenchange'));
+			const video = document.createElement('video');
+			element.appendChild(video);
+			element.target = 'media';
+			await waitForComponent();
+			expect(element.querySelector(':scope > button')).toBe(button);
+			expect(button.textContent).toBe('Exit fullscreen');
+
+			setFullscreenElement(null);
+			document.dispatchEvent(new Event('fullscreenchange'));
+			await waitForComponent();
+			expect(video.hasAttribute('controls')).toBe(true);
+			expect(
+				element
+					.querySelector(':scope > button')
+					.getAttribute('aria-controls'),
+			).toBe(video.id);
+			expect(element.querySelector('[role="status"]')).toBeNull();
+			expect(document.activeElement).toBe(
+				element.querySelector(':scope > button'),
+			);
+
+			element.target = 'self';
+			await waitForComponent();
+			element.remove();
+			expect(element.querySelector(':scope > button')).toBeNull();
+			expect(element.querySelector('[role="status"]')).toBeNull();
+			await reconnectElement();
+			expect(element.querySelectorAll(':scope > button')).toHaveLength(1);
+			expect(element.querySelectorAll('[role="status"]')).toHaveLength(1);
+		});
+
+		it('rejects unknown targets instead of falling back to media', async () => {
+			element.setAttribute('target', '#anything');
+			element.innerHTML = '<video></video>';
+			const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			await reconnectElement();
+			expect(element.querySelector('button')).toBeNull();
+			expect(warn).toHaveBeenCalledWith(
+				'fullscreen-control: target must be "media" or "self"',
+			);
+			warn.mockRestore();
+		});
+	});
+
 	describe('{name} token replacement', () => {
 		it('should replace {name} with video aria-label in button-text', async () => {
 			const video = document.createElement('video');

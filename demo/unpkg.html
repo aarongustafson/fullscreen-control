@@ -4,11 +4,17 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Fullscreen Control via unpkg</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/microlighter@2.2.0/dist/themes/github.css"
+		/>
 		<link rel="stylesheet" href="./styles.css" />
 	</head>
-	<body>
+	<body data-syntax-theme="github">
+		<a class="skip-link" href="#main">Skip to example</a>
 		<header>
-			<h1>Fullscreen Control via unpkg</h1>
+			<p class="eyebrow">Fullscreen control / unpkg</p>
+			<h1>One import. More room.</h1>
 			<p>
 				Import the auto-registering definition module. See the
 				<a
@@ -17,14 +23,29 @@
 				>
 				for the full API.
 			</p>
+			<nav aria-label="Demo pages">
+				<a href="./index.html">All examples</a>
+				<a href="./esm.html">esm.sh example</a>
+			</nav>
 		</header>
-		<main>
+		<main id="main" tabindex="-1">
 			<p>
 				This demonstration follows <code>@latest</code>; pin a tested
 				version in production. Without JavaScript or the CDN, native
 				video controls still work. Use Escape or browser controls to
 				exit fullscreen.
 			</p>
+			<p class="code-help">
+				Copy includes the complete snippet. Syntax colors distinguish
+				tags, attributes, and values. If copying is blocked, select and
+				copy the code manually.
+			</p>
+			<p
+				id="microlighter-status"
+				class="enhancement-status"
+				role="status"
+				hidden
+			></p>
 			<noscript
 				><p>
 					JavaScript is off. Use the native video controls or open the
@@ -34,20 +55,27 @@
 			<section class="demo-section">
 				<h2>Automatic registration</h2>
 				<div class="code-demo-pair">
-					<pre
-						tabindex="0"
-						aria-label="unpkg import example code"
-					><code>&lt;script type="module"&gt;
-  <mark>import 'https://unpkg.com/@aarongustafson/fullscreen-control@latest/define.js?module';</mark>
+					<micro-lighter
+						class="code-panel"
+						language="html"
+						controls="copy"
+						data-label="HTML + JavaScript"
+					>
+						<pre
+							tabindex="0"
+							aria-label="unpkg import example code"
+						><code>&lt;script type="module"&gt;
+  import 'https://unpkg.com/@aarongustafson/fullscreen-control@latest/define.js?module';
 &lt;/script&gt;
-<mark>&lt;fullscreen-control button-text="Watch fullscreen"&gt;</mark>
-  &lt;video src="./sample.webm" controls
+&lt;fullscreen-control button-text="Watch fullscreen"&gt;
+  &lt;video src="./sample.mp4" controls
     aria-label="Moving circle"&gt;&lt;/video&gt;
-<mark>&lt;/fullscreen-control&gt;</mark></code></pre>
+&lt;/fullscreen-control&gt;</code></pre>
+					</micro-lighter>
 					<div class="demo">
 						<fullscreen-control button-text="Watch fullscreen"
 							><video
-								src="./sample.webm"
+								src="./sample.mp4"
 								controls
 								preload="metadata"
 								width="320"
@@ -58,7 +86,7 @@
 						<p>
 							Silent clip: a circle moves left to right across a
 							rectangle; no audio.
-							<a href="./sample.webm">Open the sample clip</a>.
+							<a href="./sample.mp4">Open the sample clip</a>.
 						</p>
 					</div>
 				</div>
@@ -74,6 +102,7 @@
 				>.
 			</p>
 		</footer>
+		<script type="module" src="./demo.js"></script>
 		<script type="module">
 			import 'https://unpkg.com/@aarongustafson/fullscreen-control@latest/define.js?module';
 		</script>

@@ -7,7 +7,9 @@
 [![Type definitions](https://img.shields.io/npm/types/@aarongustafson/fullscreen-control)](https://github.com/aarongustafson/fullscreen-control/blob/main/fullscreen-control.d.ts)
 
 Adds a fullscreen button to the first video or iframe inside a light-DOM custom
-element. The media itself enters fullscreen; the host and button do not.
+element. By default, the media itself enters fullscreen; the host and button do not.
+Set `target="self"` to fullscreen the wrapper and all its contents instead,
+including code examples and their controls.
 Author native media controls and useful links so the content remains usable
 before JavaScript loads or when fullscreen is unavailable.
 
@@ -16,6 +18,23 @@ before JavaScript loads or when fullscreen is unavailable.
 - [Full examples](https://aarongustafson.github.io/fullscreen-control/demo/) ([source](./demo/index.html))
 - [esm.sh class import](https://aarongustafson.github.io/fullscreen-control/demo/esm) ([source](./demo/esm.html))
 - [unpkg automatic registration](https://aarongustafson.github.io/fullscreen-control/demo/unpkg) ([source](./demo/unpkg.html))
+
+The main and CDN pages are a demo-design pilot. Every displayed code block uses
+MicroLighter 2.2.0 for Copy, with line numbers on longer snippets. The demos
+follow the system light/dark preference, keep code/live pairs side by side
+when space allows, and stack them on narrow screens. A skip link leads to the
+examples. Plain code and native media remain usable without JavaScript or the CDN.
+
+MicroLighter 2.2.0 only syntax-colors code with a single text node. Displayed
+snippets therefore use plain text without `<mark>` wrappers, allowing HTML,
+CSS, and JavaScript syntax coloring without changing copied text.
+
+Copy uses MicroLighter’s English labels and clipboard behavior. Version 2.2.0
+doesn’t render a clipboard-rejection message or provide a localization API.
+The pages keep manual selection/copy guidance visible or in the main page’s
+“Code controls, highlighting, and fallbacks” disclosure. They don’t query
+permissions or read the clipboard. Test clipboard policies and assistive
+technology feedback in the target browsers before adopting this pattern.
 
 ## Installation and registration
 
@@ -86,12 +105,15 @@ page’s Permissions Policy before adopting it.
 
 ## Labels and localization
 
-| Attribute      | Property      | Default             | Behavior                                                                        |
-| -------------- | ------------- | ------------------- | ------------------------------------------------------------------------------- |
-| `button-text`  | `buttonText`  | `"View fullscreen"` | Visible text; missing or empty values use the default.                          |
-| `button-label` | `buttonLabel` | `""`                | Optional accessible name. Empty or identical resolved labels omit `aria-label`. |
+| Attribute      | Property      | Default                                                                 | Behavior                                                                          |
+| -------------- | ------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `button-text`  | `buttonText`  | `"View fullscreen"`                                                     | Visible text; missing or empty values use the default.                            |
+| `button-label` | `buttonLabel` | `""`                                                                    | Optional accessible name. Empty or identical resolved labels omit `aria-label`.   |
+| `exit-text`    | `exitText`    | `"Exit fullscreen"`                                                     | Visible exit text when the wrapper is fullscreen in self mode. Supports `{name}`. |
+| `exit-label`   | `exitLabel`   | `""`                                                                    | Optional exit accessible name in self mode. Supports `{name}`.                    |
+| `error-text`   | `errorText`   | `"Unable to change fullscreen. Try again or use the browser controls."` | Plain-text entry/exit failure feedback in self mode.                              |
 
-Both string properties reflect to their attributes. Setting `null`, `undefined`,
+These string properties reflect to their attributes. Setting `null`, `undefined`,
 or an empty string removes the attribute. Getters return the defaults above.
 The bundled TypeScript declarations describe the string-valued public API.
 
@@ -104,6 +126,9 @@ Names containing [replacement patterns](https://developer.mozilla.org/en-US/docs
 such as `$&` or `$$` are interpreted accordingly. For example, a name of `$&`
 leaves `{name}` in the resolved label. Avoid replacement sequences in names
 used with `{name}`; this is an existing runtime limitation.
+In self mode, `{name}` uses the host’s `aria-label` or `title`, not a descendant.
+The entry and exit labels are separate; an entry `button-label` is not reused
+for the exit action.
 
 Author translated labels and set the content language:
 
@@ -137,24 +162,102 @@ Translate `button-label` and the media name for the content language. Keep a
 visible explanation of the icon’s purpose nearby. The demo gives this button a
 minimum 44px target and retains its native focus indicator.
 
+## Fullscreen a wrapper
+
+Use `target="self"` to keep content and its controls together in fullscreen.
+No video or iframe is required. The component adds its own button and status
+region without moving, cloning, or replacing authored content.
+
+```html
+<fullscreen-control
+  target="self"
+  aria-label="Greeting example"
+  button-text="View fullscreen"
+  exit-text="Exit fullscreen"
+  error-text="Fullscreen is unavailable. You can still read and copy this code."
+>
+  <pre
+    tabindex="0"
+    aria-label="Greeting code"
+  ><code>console.log("Hello");</code></pre>
+</fullscreen-control>
+```
+
+`target` reflects the matching attribute. Missing or empty values use `"media"`,
+the existing first-video-or-iframe behavior. Only `"media"` and `"self"` are
+accepted; other values log a warning and do not create controls. A target change
+while fullscreen is active takes effect after exit so it doesn’t remove the
+Exit button.
+
+In self mode, the button changes to the exit wording on an observed fullscreen
+transition. Entry from the button focuses that same button inside fullscreen;
+exit returns focus to it. Native Tab navigation still reaches the content and
+its controls. Programmatic entry doesn’t move focus. Author a name for the
+wrapper and make overflowing code keyboard-scrollable, as in the example.
+Keyboard navigation follows browser preferences; Safari may require Option-Tab
+to reach buttons when full keyboard navigation is off.
+
+The default self-mode button sits in normal flow after the content. The
+fullscreen host has an opaque Canvas/CanvasText surface, padding, and scrolling.
+Override its `:fullscreen` styling for your layout, keeping the exit control
+visible and reachable.
+
+### Compose with MicroLighter
+
+[MicroLighter](https://github.com/davatron5000/microlighter) provides highlighting,
+Copy, and line numbers. Wrap its element in self mode:
+
+```html
+<fullscreen-control target="self" aria-label="Greeting example">
+  <micro-lighter
+    language="javascript"
+    controls="copy"
+    line-numbers
+    data-syntax-theme="github"
+  >
+    <pre
+      tabindex="0"
+      aria-label="Greeting code"
+    ><code>console.log("Hello");</code></pre>
+  </micro-lighter>
+</fullscreen-control>
+```
+
+Load MicroLighter’s element module and theme separately, following its
+installation instructions. It isn’t a runtime dependency of this package.
+The [main demo](https://aarongustafson.github.io/fullscreen-control/demo/#microlighter-example)
+loads version 2.2.0 from jsDelivr and includes loading and failure messages.
+It preserves the original light-DOM code and its text nodes, so CSS Custom
+Highlight ranges survive entry and exit. MicroLighter uses its own shadow root
+for controls; `fullscreen-control` remains light DOM and doesn’t style those controls.
+Style them through MicroLighter’s documented parts.
+
+Copy permissions, feedback, and localization belong to MicroLighter, not this
+component. The demo uses its English controls and retains selectable code if
+copying fails. A blocked module leaves the code readable; fullscreen works
+independently. Neither component is required to read the unenhanced code.
+
 ## Methods and events
 
-| Method               | Return          | Behavior                                                          |
-| -------------------- | --------------- | ----------------------------------------------------------------- |
-| `enterFullscreen()`  | `Promise<void>` | Requests fullscreen for the media; normally needs a user gesture. |
-| `exitFullscreen()`   | `Promise<void>` | Requests exit only when this media is fullscreen.                 |
-| `toggleFullscreen()` | `void`          | Starts entry or exit without returning its promise.               |
+| Method               | Return          | Behavior                                                                    |
+| -------------------- | --------------- | --------------------------------------------------------------------------- |
+| `enterFullscreen()`  | `Promise<void>` | Requests fullscreen for the selected target; normally needs a user gesture. |
+| `exitFullscreen()`   | `Promise<void>` | Requests exit only when this target is fullscreen.                          |
+| `toggleFullscreen()` | `void`          | Starts entry or exit without returning its promise.                         |
 
-The component logs request failures to the console. These methods do not
-return a success flag or render a visible error; absent browser methods can
-also leave the media unchanged. Keep native controls and fallback links usable,
-and provide authored, localized recovery guidance when fullscreen is important
-to a task.
+The component logs request failures, including unavailable APIs, to the console.
+In self mode, it also shows `error-text` in a generated `role="status"` region.
+The message clears on the next attempt; a failed request leaves the button
+available for retry and doesn’t claim the fullscreen state changed. The methods
+do not return a success flag. Media mode retains console-only feedback.
+Keep native controls and fallback links usable, and provide authored, localized
+recovery guidance when fullscreen is important to a task. There is no simulated
+fullscreen or expanded-view fallback.
 
-| Event                      | Detail | Behavior                                            |
-| -------------------------- | ------ | --------------------------------------------------- |
-| `fullscreen-control:enter` | `null` | Observed transition into fullscreen for this media. |
-| `fullscreen-control:exit`  | `null` | Observed transition out of fullscreen.              |
+| Event                      | Detail | Behavior                                               |
+| -------------------------- | ------ | ------------------------------------------------------ |
+| `fullscreen-control:enter` | `null` | Observed transition into fullscreen for this target.   |
+| `fullscreen-control:exit`  | `null` | Observed transition out of fullscreen for this target. |
 
 Both are bubbling, composed `CustomEvent` events with `detail === null`.
 The existing declaration aliases use `CustomEvent<void>` to indicate no
@@ -175,8 +278,10 @@ control.addEventListener('fullscreen-control:exit', () => {
 
 There is no shadow root. The component injects one shared style element per
 document: the default host is relatively positioned and inline-block, with an
-absolutely positioned native button at the top-right. It honors `hidden` and
-does not inject a color palette or replace native focus styling.
+absolutely positioned native button at the top-right in media mode. In self mode,
+the button stays in normal flow after the content. It honors `hidden` and
+retains native focus styling. Only the fullscreen wrapper gets a
+Canvas/CanvasText surface.
 
 | CSS custom property                             | Default  | Purpose                             |
 | ----------------------------------------------- | -------- | ----------------------------------- |
@@ -240,11 +345,13 @@ Keep foreground/background pairs together and check text and boundaries for
 custom themes, including hover. Avoid opacity-based dimming and blanket
 `forced-color-adjust: none`. The demos retain native focus, use foreground
 boundaries, and provide an opt-in red theme with a matching white foreground.
-Their prose uses Canvas/CanvasText and code/event output uses Canvas-backed
-Field/FieldText. Only the Canvas-backed footer uses an 80% foreground mix;
+Their prose uses Canvas/CanvasText; code uses MicroLighter’s paired GitHub theme
+colors, while event output uses Canvas-backed Field/FieldText.
+The decorative grid disappears with increased contrast or forced colors.
+Only the Canvas-backed footer uses an 80% foreground mix;
 increased contrast and forced colors restore the full foreground.
 
-The button gets `aria-controls`, using an existing media ID or generating one.
+The button gets `aria-controls`, using an existing target ID or generating one.
 Name and ID attribute changes update its label and association. Activation
 through the component’s button requests focus return after an observed exit.
 Programmatic entry does not set that request. Escape handling and native
@@ -256,9 +363,11 @@ The component adds `role="group"` only when the author did not provide a role.
 Initialization is scheduled for an animation frame, with a timer fallback.
 Direct-child media or wrapper insertion/removal rebuilds the enhancement;
 changes inside an unchanged nested wrapper are not watched for media replacement.
-Attribute changes update labels without rebuilding the button.
+In self mode, descendant changes do not rebuild the enhancement or touch code
+nodes, highlighting ranges, or nested controls. Label changes update the button
+without rebuilding it.
 
-Disconnecting cancels scheduled work, removes the button and listeners,
+Disconnecting cancels scheduled work, removes the button, status region, and listeners,
 disconnects observers, and restores patched target attribute methods. It does
 not remove the shared style element or restore generated IDs, roles, video
 controls, or iframe permission attributes. Rebuilding can replace a focused
@@ -292,7 +401,7 @@ node scripts/serve.js
 Open <http://127.0.0.1:4183/demo/index.html>. Install the Playwright engines if
 the browser runner reports them missing. The demos use a small, locally
 generated silent clip, with a visible description of its complete content.
-Playback needs WebM support; use the local text presentation if the clip cannot
+Playback needs H.264/MP4 support; use the local text presentation if the clip cannot
 play in your browser.
 To regenerate it with the installed Chromium engine, run
 `node scripts/create-demo-video.js`. It contains no third-party footage.

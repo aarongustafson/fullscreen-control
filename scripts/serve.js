@@ -11,6 +11,7 @@ const types = new Map([
 	['.js', 'text/javascript'],
 	['.json', 'application/json'],
 	['.webm', 'video/webm'],
+	['.mp4', 'video/mp4'],
 ]);
 
 createServer(async (request, response) => {

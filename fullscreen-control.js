@@ -1,10 +1,14 @@
 /**
- * FullscreenControlElement - A web component to progressively enhance any video or iframe element to have fullscreen capabilities.
+ * FullscreenControlElement - Fullscreen controls for media or an authored wrapper.
  *
  * @element fullscreen-control
  *
  * @attr {string} button-text - The visible text for the fullscreen button (default: "View fullscreen"). Use {name} to inject the accessible name of the video/iframe.
  * @attr {string} button-label - Optional aria-label for the fullscreen button. Use {name} to inject the accessible name of the video/iframe. If not set, uses button-text.
+ * @attr {"media"|"self"} target - Fullscreen the first video/iframe (default), or this wrapper and all its controls.
+ * @attr {string} exit-text - Visible exit button text in self mode (default: "Exit fullscreen"). Supports {name}.
+ * @attr {string} exit-label - Optional exit button aria-label in self mode. Supports {name}.
+ * @attr {string} error-text - Localized failure feedback in self mode.
  *
  * @fires fullscreen-control:enter - Fired when entering fullscreen mode
  * @fires fullscreen-control:exit - Fired when exiting fullscreen mode
@@ -16,7 +20,14 @@ const DEFAULT_BUTTON_TEXT = 'View fullscreen';
 const STYLE_ELEMENT_ID = 'fullscreen-control-styles';
 export class FullscreenControlElement extends HTMLElement {
 	static get observedAttributes() {
-		return ['button-text', 'button-label'];
+		return [
+			'button-text',
+			'button-label',
+			'target',
+			'exit-text',
+			'exit-label',
+			'error-text',
+		];
 	}
 
 	static _injectStyles() {
@@ -36,12 +47,31 @@ export class FullscreenControlElement extends HTMLElement {
 				display: none !important;
 			}
 
-			fullscreen-control button {
+			fullscreen-control > button {
 				position: absolute;
 				inset-block-start: var(--fullscreen-control-button-inset-block-start, 0.5rem);
 				inset-inline-end: var(--fullscreen-control-button-inset-inline-end, 0.5rem);
 				cursor: pointer;
 				z-index: 1;
+			}
+
+			fullscreen-control:fullscreen {
+				box-sizing: border-box;
+				display: block;
+				overflow: auto;
+				padding: 1rem;
+				background: Canvas;
+				color: CanvasText;
+			}
+
+			fullscreen-control[target="self"] > button,
+			fullscreen-control:fullscreen > button {
+				position: static;
+				margin-block: 0.5rem;
+			}
+
+			fullscreen-control > [role="status"]:empty {
+				margin: 0;
 			}
 		`;
 
@@ -55,6 +85,7 @@ export class FullscreenControlElement extends HTMLElement {
 				? this.attachInternals()
 				: null;
 		this._button = null;
+		this._status = null;
 		this._target = null;
 		this._targetId = null;
 		this._shouldReturnFocus = false;
@@ -78,6 +109,10 @@ export class FullscreenControlElement extends HTMLElement {
 	connectedCallback() {
 		this._upgradeProperty('buttonText');
 		this._upgradeProperty('buttonLabel');
+		this._upgradeProperty('target');
+		this._upgradeProperty('exitText');
+		this._upgradeProperty('exitLabel');
+		this._upgradeProperty('errorText');
 		this._ensureHostAttributes();
 		this._setupMutationObserver();
 		this._scheduleSetup();
@@ -97,8 +132,20 @@ export class FullscreenControlElement extends HTMLElement {
 		switch (name) {
 			case 'button-text':
 			case 'button-label':
+			case 'exit-text':
+			case 'exit-label':
 				if (this._button) {
 					this._updateButtonText();
+				}
+				break;
+			case 'target':
+				if (this.isConnected && !this._isFullscreen()) {
+					this._scheduleSetup();
+				}
+				break;
+			case 'error-text':
+				if (this._status?.textContent) {
+					this._status.textContent = this.errorText;
 				}
 				break;
 			default:
@@ -120,6 +167,41 @@ export class FullscreenControlElement extends HTMLElement {
 
 	set buttonLabel(value) {
 		this._reflectStringAttribute('button-label', value);
+	}
+
+	get target() {
+		return this.getAttribute('target') || 'media';
+	}
+
+	set target(value) {
+		this._reflectStringAttribute('target', value);
+	}
+
+	get exitText() {
+		return this.getAttribute('exit-text') || 'Exit fullscreen';
+	}
+
+	set exitText(value) {
+		this._reflectStringAttribute('exit-text', value);
+	}
+
+	get exitLabel() {
+		return this.getAttribute('exit-label') || '';
+	}
+
+	set exitLabel(value) {
+		this._reflectStringAttribute('exit-label', value);
+	}
+
+	get errorText() {
+		return (
+			this.getAttribute('error-text') ||
+			'Unable to change fullscreen. Try again or use the browser controls.'
+		);
+	}
+
+	set errorText(value) {
+		this._reflectStringAttribute('error-text', value);
 	}
 
 	_getTargetName() {
@@ -145,12 +227,17 @@ export class FullscreenControlElement extends HTMLElement {
 			return;
 		}
 
-		const visibleText = this._replaceNameToken(this.buttonText);
+		const isExit = this._target === this && this._isFullscreenActive;
+		const visibleText = this._replaceNameToken(
+			isExit ? this.exitText : this.buttonText,
+		);
 		this._button.textContent = visibleText;
 
-		const hasCustomLabel = this.hasAttribute('button-label');
+		const hasCustomLabel = this.hasAttribute(
+			isExit ? 'exit-label' : 'button-label',
+		);
 		const resolvedLabel = hasCustomLabel
-			? this._replaceNameToken(this.buttonLabel)
+			? this._replaceNameToken(isExit ? this.exitLabel : this.buttonLabel)
 			: '';
 
 		if (hasCustomLabel && resolvedLabel && resolvedLabel !== visibleText) {
@@ -161,7 +248,14 @@ export class FullscreenControlElement extends HTMLElement {
 	}
 
 	_setup() {
-		this._target = this.querySelector('video, iframe');
+		if (!['media', 'self'].includes(this.target)) {
+			console.warn(
+				'fullscreen-control: target must be "media" or "self"',
+			);
+			return false;
+		}
+		this._target =
+			this.target === 'self' ? this : this.querySelector('video, iframe');
 		if (!this._target) {
 			console.warn(
 				'fullscreen-control: No video or iframe element found',
@@ -173,6 +267,11 @@ export class FullscreenControlElement extends HTMLElement {
 		this._enhanceTarget();
 		FullscreenControlElement._injectStyles();
 		this._createButton();
+		if (this._target === this) {
+			this._status = document.createElement('p');
+			this._status.setAttribute('role', 'status');
+			this.appendChild(this._status);
+		}
 		this._observeTargetAttributes();
 		this._startFullscreenObserver();
 		return true;
@@ -192,6 +291,8 @@ export class FullscreenControlElement extends HTMLElement {
 			this._button.remove();
 			this._button = null;
 		}
+		this._status?.remove();
+		this._status = null;
 		document.removeEventListener('keydown', this._handleEscape);
 		this._stopFullscreenObserver();
 		this._disconnectTargetObserver();
@@ -244,26 +345,38 @@ export class FullscreenControlElement extends HTMLElement {
 
 	_handleFullscreenChange() {
 		const isFullscreen = this._isFullscreen();
+		const wasFullscreen = this._isFullscreenActive;
+		this._isFullscreenActive = isFullscreen;
+		this._updateButtonText();
 		if (isFullscreen) {
 			// Listen for escape key when in fullscreen
 			document.addEventListener('keydown', this._handleEscape);
-			if (!this._isFullscreenActive) {
+			if (!wasFullscreen) {
+				if (this._target === this && this._shouldReturnFocus) {
+					this._button?.focus();
+				}
 				this._dispatchFullscreenEvent('enter');
 			}
 		} else {
 			// Remove escape listener when not in fullscreen
 			document.removeEventListener('keydown', this._handleEscape);
-			if (this._isFullscreenActive) {
+			if (wasFullscreen) {
 				this._dispatchFullscreenEvent('exit');
 			}
 
 			// Return focus to button if it triggered fullscreen
-			if (this._shouldReturnFocus && this._button) {
+			if (wasFullscreen && this._shouldReturnFocus && this._button) {
 				this._button.focus();
 				this._shouldReturnFocus = false;
 			}
+			if (
+				wasFullscreen &&
+				((this.target === 'self') !== (this._target === this) ||
+					!['media', 'self'].includes(this.target))
+			) {
+				this._scheduleSetup();
+			}
 		}
-		this._isFullscreenActive = isFullscreen;
 	}
 
 	_scheduleSetup() {
@@ -309,8 +422,12 @@ export class FullscreenControlElement extends HTMLElement {
 	}
 
 	_initialize() {
+		const restoreFocus = this._button === document.activeElement;
 		this._cleanup();
 		const didSetup = this._setup();
+		if (didSetup && restoreFocus) {
+			this._button.focus();
+		}
 		if (didSetup && this._internals?.states) {
 			this._internals.states.add('rendered');
 		}
@@ -328,6 +445,9 @@ export class FullscreenControlElement extends HTMLElement {
 		}
 
 		this._mutationObserver = new MutationObserver((mutations) => {
+			if (this.target === 'self' || this._target === this) {
+				return;
+			}
 			for (const mutation of mutations) {
 				if (mutation.type !== 'childList') {
 					continue;
@@ -580,10 +700,27 @@ export class FullscreenControlElement extends HTMLElement {
 
 	_isFullscreen() {
 		return (
-			document.fullscreenElement === this._target ||
-			document.webkitFullscreenElement === this._target ||
-			document.mozFullScreenElement === this._target
+			Boolean(this._target) &&
+			(document.fullscreenElement === this._target ||
+				document.webkitFullscreenElement === this._target ||
+				document.mozFullScreenElement === this._target)
 		);
+	}
+
+	_clearError() {
+		if (this._status) {
+			this._status.textContent = '';
+		}
+	}
+
+	_reportError(action, error) {
+		console.error(`Error ${action} fullscreen:`, error);
+		if (this._status) {
+			this._status.textContent = this.errorText;
+		}
+		if (!this._isFullscreen()) {
+			this._shouldReturnFocus = false;
+		}
 	}
 
 	/**
@@ -597,20 +734,19 @@ export class FullscreenControlElement extends HTMLElement {
 			return;
 		}
 
+		this._clearError();
 		try {
-			let didEnter = false;
 			if (this._target.requestFullscreen) {
 				await this._target.requestFullscreen();
-				didEnter = true;
 			} else if (this._target.webkitRequestFullscreen) {
 				await this._target.webkitRequestFullscreen();
-				didEnter = true;
 			} else if (this._target.mozRequestFullScreen) {
 				await this._target.mozRequestFullScreen();
-				didEnter = true;
+			} else {
+				throw new Error('Fullscreen API is unavailable.');
 			}
 		} catch (error) {
-			console.error('Error entering fullscreen:', error);
+			this._reportError('entering', error);
 		}
 	}
 
@@ -621,6 +757,7 @@ export class FullscreenControlElement extends HTMLElement {
 		if (!this._isFullscreen()) {
 			return;
 		}
+		this._clearError();
 		try {
 			if (document.exitFullscreen) {
 				await document.exitFullscreen();
@@ -628,9 +765,11 @@ export class FullscreenControlElement extends HTMLElement {
 				await document.webkitExitFullscreen();
 			} else if (document.mozCancelFullScreen) {
 				await document.mozCancelFullScreen();
+			} else {
+				throw new Error('Fullscreen exit API is unavailable.');
 			}
 		} catch (error) {
-			console.error('Error exiting fullscreen:', error);
+			this._reportError('exiting', error);
 		}
 	}
 

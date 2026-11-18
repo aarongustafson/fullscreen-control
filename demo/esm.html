@@ -4,11 +4,17 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Fullscreen Control via esm.sh</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/microlighter@2.2.0/dist/themes/github.css"
+		/>
 		<link rel="stylesheet" href="./styles.css" />
 	</head>
-	<body>
+	<body data-syntax-theme="github">
+		<a class="skip-link" href="#main">Skip to example</a>
 		<header>
-			<h1>Fullscreen Control via esm.sh</h1>
+			<p class="eyebrow">Fullscreen control / esm.sh</p>
+			<h1>Import. Register. Expand.</h1>
 			<p>
 				Import the class and register it once. See the
 				<a
@@ -17,13 +23,28 @@
 				>
 				for the full API.
 			</p>
+			<nav aria-label="Demo pages">
+				<a href="./index.html">All examples</a>
+				<a href="./unpkg.html">unpkg example</a>
+			</nav>
 		</header>
-		<main>
+		<main id="main" tabindex="-1">
 			<p>
 				This page pins the class module’s version. CDN failure or
 				disabled JavaScript leaves the native video controls available.
 				Use Escape or browser controls to exit fullscreen.
 			</p>
+			<p class="code-help">
+				Copy includes the complete snippet. Syntax colors distinguish
+				tags, attributes, and values. If copying is blocked, select and
+				copy the code manually.
+			</p>
+			<p
+				id="microlighter-status"
+				class="enhancement-status"
+				role="status"
+				hidden
+			></p>
 			<noscript
 				><p>
 					JavaScript is off. Use the native video controls or open the
@@ -33,25 +54,33 @@
 			<section class="demo-section">
 				<h2>Class-only import</h2>
 				<div class="code-demo-pair">
-					<pre
-						tabindex="0"
-						aria-label="ESM import example code"
-					><code>&lt;script type="module"&gt;
-  <mark>import { FullscreenControlElement } from
-    'https://esm.sh/@aarongustafson/fullscreen-control@2.0.7/fullscreen-control.js?bundle&amp;target=es2022';</mark>
-  if (!<mark>customElements.get('fullscreen-control')</mark>) {
-    <mark>customElements.define('fullscreen-control',
-      FullscreenControlElement);</mark>
+					<micro-lighter
+						class="code-panel"
+						language="html"
+						controls="copy"
+						data-label="HTML + JavaScript"
+						line-numbers
+					>
+						<pre
+							tabindex="0"
+							aria-label="ESM import example code"
+						><code>&lt;script type="module"&gt;
+  import { FullscreenControlElement } from
+    'https://esm.sh/@aarongustafson/fullscreen-control@2.0.7/fullscreen-control.js?bundle&amp;target=es2022';
+  if (!customElements.get('fullscreen-control')) {
+    customElements.define('fullscreen-control',
+      FullscreenControlElement);
   }
 &lt;/script&gt;
-<mark>&lt;fullscreen-control&gt;</mark>
-  &lt;video src="./sample.webm" controls
+&lt;fullscreen-control&gt;
+  &lt;video src="./sample.mp4" controls
     aria-label="Moving circle"&gt;&lt;/video&gt;
-<mark>&lt;/fullscreen-control&gt;</mark></code></pre>
+&lt;/fullscreen-control&gt;</code></pre>
+					</micro-lighter>
 					<div class="demo">
 						<fullscreen-control
 							><video
-								src="./sample.webm"
+								src="./sample.mp4"
 								controls
 								preload="metadata"
 								width="320"
@@ -62,7 +91,7 @@
 						<p>
 							Silent clip: a circle moves left to right across a
 							rectangle; no audio.
-							<a href="./sample.webm">Open the sample clip</a>.
+							<a href="./sample.mp4">Open the sample clip</a>.
 						</p>
 					</div>
 				</div>
@@ -78,6 +107,7 @@
 				>.
 			</p>
 		</footer>
+		<script type="module" src="./demo.js"></script>
 		<script type="module">
 			import { FullscreenControlElement } from 'https://esm.sh/@aarongustafson/fullscreen-control@2.0.7/fullscreen-control.js?bundle&target=es2022';
 			if (!customElements.get('fullscreen-control')) {

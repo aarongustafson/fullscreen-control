@@ -1,3 +1,15 @@
+[data-syntax-theme] {
+	color-scheme: inherit;
+}
+
+@font-face {
+	font-family: 'system-monospace';
+	src:
+		local('SFMono-Regular'), local('Menlo'), local('Monaco'),
+		local('Consolas'), local('Liberation Mono'), local('Courier New'),
+		local('monospace');
+}
+
 :root {
 	color-scheme: light dark;
 	--accent: light-dark(#075e58, #8ee3d1);
@@ -55,10 +67,16 @@ body::before {
 	outline-offset: 4px;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: system-monospace, monospace;
+}
 h1 {
-	font-family: ui-monospace, monospace;
 	font-size: clamp(2rem, 5vw, 4.5rem);
-	letter-spacing: -0.06em;
 	line-height: 1.15;
 	margin-block: 1rem 1.5rem;
 }
@@ -90,7 +108,7 @@ header {
 }
 .eyebrow {
 	font:
-		700 0.8rem / 1.5 ui-monospace,
+		700 0.8rem / 1.5 system-monospace,
 		monospace;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
@@ -183,8 +201,11 @@ footer {
 	}
 }
 
-code {
-	font-family: ui-monospace, monospace;
+pre,
+code,
+kbd,
+samp {
+	font-family: system-monospace, monospace;
 	font-size: 0.9em;
 }
 pre,
@@ -215,8 +236,9 @@ pre code {
 .demo::before {
 	content: 'Live example';
 	display: block;
+	grid-column: 1 / -1;
 	font:
-		700 0.75rem / 1.5 ui-monospace,
+		700 0.75rem / 1.5 system-monospace,
 		monospace;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
@@ -318,7 +340,7 @@ micro-lighter::before {
 	margin: 1rem;
 	max-inline-size: calc(100% - 7rem);
 	font:
-		700 0.7rem / 1.5 ui-monospace,
+		700 0.7rem / 1.5 system-monospace,
 		monospace;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
@@ -347,7 +369,7 @@ micro-lighter::part(line-numbers) {
 }
 .event-log {
 	margin-block-start: 1rem;
-	font-family: ui-monospace, monospace;
+	font-family: system-monospace, monospace;
 	font-size: 0.875rem;
 }
 .event-log p {
@@ -373,6 +395,42 @@ micro-lighter::part(line-numbers) {
 	}
 }
 @media (forced-colors: active), (prefers-contrast: more) {
+	[data-syntax-theme] {
+		--syntax-background: Field;
+		--syntax-foreground: FieldText;
+		--syntax-comment: FieldText;
+		--syntax-keyword: FieldText;
+		--syntax-operator: FieldText;
+		--syntax-string: FieldText;
+		--syntax-constant: FieldText;
+		--syntax-function: FieldText;
+		--syntax-type: FieldText;
+		--syntax-variable: FieldText;
+		--syntax-property: FieldText;
+		--syntax-tag: FieldText;
+		--syntax-selector: FieldText;
+		--syntax-inserted: FieldText;
+		--syntax-deleted: FieldText;
+	}
+	body[data-syntax-theme] micro-lighter pre,
+	body[data-syntax-theme] pre,
+	body[data-syntax-theme] .event-log,
+	pre,
+	.event-log {
+		background-color: Field;
+		background-image: none;
+		color: FieldText;
+	}
+	micro-lighter {
+		background: Field;
+		color: FieldText;
+	}
+	body[data-syntax-theme] micro-lighter pre,
+	micro-lighter pre,
+	micro-lighter::part(copy-button),
+	micro-lighter::part(line-numbers) {
+		background-color: transparent;
+	}
 	body::before {
 		display: none;
 	}

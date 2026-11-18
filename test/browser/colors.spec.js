@@ -493,12 +493,24 @@ test('local silent video decodes and plays to completion without autoplay', asyn
 	await page
 		.getByRole('button', { name: 'Play test clip', exact: true })
 		.click();
+	await expect(video).toBeInViewport({ ratio: 1 });
 	await expect
 		.poll(() => video.evaluate((video) => video.currentTime))
 		.toBeGreaterThan(0);
 	await expect
-		.poll(() => video.evaluate((video) => video.ended), { timeout: 10000 })
-		.toBe(true);
+		.poll(
+			() =>
+				video.evaluate((video) => ({
+					ended: video.ended,
+					currentTime: video.currentTime,
+					duration: video.duration,
+					paused: video.paused,
+					readyState: video.readyState,
+					error: video.error?.message ?? null,
+				})),
+			{ timeout: 10000 },
+		)
+		.toMatchObject({ ended: true });
 });
 
 test('class-only imports preserve manual registration and default positioning hooks', async ({
@@ -823,7 +835,9 @@ for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
 		await expect(page.locator('.skip-link')).toBeFocused();
 		await page.keyboard.press('Enter');
 		await expect(page.locator('main')).toBeFocused();
-		const panels = page.locator('.code-demo-pair > micro-lighter');
+		const panels = page.locator(
+			'.code-demo-pair > :is(pre, micro-lighter)',
+		);
 		expect(await panels.count()).toBeGreaterThan(0);
 		for (const panel of await panels.all()) {
 			const text = await panel.locator('code').textContent();

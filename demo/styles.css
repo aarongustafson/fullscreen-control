@@ -421,6 +421,12 @@ micro-lighter::part(line-numbers) {
 		background-image: none;
 		color: FieldText;
 	}
+	body[data-syntax-theme] micro-lighter pre,
+	micro-lighter pre,
+	micro-lighter::part(copy-button),
+	micro-lighter::part(line-numbers) {
+		background-color: transparent;
+	}
 	body::before {
 		display: none;
 	}

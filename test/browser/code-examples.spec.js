@@ -240,6 +240,12 @@ test('loaded syntax styles respect distinct high-contrast field surfaces and inh
 		'all',
 	);
 	const code = page.locator('micro-lighter pre').first();
+	await page
+		.locator('micro-lighter')
+		.first()
+		.evaluate((panel) => {
+			panel.classList.remove('code-panel');
+		});
 	await expect(page.locator('micro-lighter').first()).toHaveCSS(
 		'background-color',
 		'rgb(20, 30, 40)',
@@ -247,10 +253,45 @@ test('loaded syntax styles respect distinct high-contrast field surfaces and inh
 	await expect(code).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
 	await expect(code).toHaveCSS('color', 'rgb(255, 255, 0)');
 	await expect(code).toHaveCSS('--syntax-keyword', 'rgb(255, 255, 0)');
+	const greeting = page.locator('#code-demo micro-lighter');
+	await expect(greeting).toHaveCSS('display', 'grid');
+	await expect(greeting).toHaveCSS('background-color', 'rgb(20, 30, 40)');
+	await expect(greeting.locator('pre')).toHaveCSS(
+		'background-color',
+		'rgba(0, 0, 0, 0)',
+	);
+	await expect(greeting.locator('pre')).toHaveCSS(
+		'color',
+		'rgb(255, 255, 0)',
+	);
 	await page.addStyleTag({ content: ':root { color-scheme: light; }' });
 	for (const scope of await page.locator('[data-syntax-theme]').all()) {
 		await expect(scope).toHaveCSS('color-scheme', 'light');
 	}
+});
+
+test.describe('nested highlighter without JavaScript', () => {
+	test.use({ javaScriptEnabled: false });
+
+	test('keeps the greeting on one paired field surface without enhancement', async ({
+		page,
+	}) => {
+		await serveDemo(page, { distinctFields: true });
+		await page.emulateMedia({ contrast: 'more', colorScheme: 'dark' });
+		await page.goto('http://code-demo.test/demo/index.html');
+		const greeting = page.locator('#code-demo micro-lighter');
+		await expect(greeting).toHaveCSS('display', 'block');
+		await expect(greeting).toHaveCSS('background-color', 'rgb(20, 30, 40)');
+		await expect(greeting).toHaveCSS('color', 'rgb(255, 255, 0)');
+		await expect(greeting.locator('pre')).toHaveCSS(
+			'background-color',
+			'rgba(0, 0, 0, 0)',
+		);
+		await expect(greeting.locator('pre')).toHaveCSS(
+			'color',
+			'rgb(255, 255, 0)',
+		);
+	});
 });
 
 test('all heading levels use the shared monospace alias', async ({ page }) => {

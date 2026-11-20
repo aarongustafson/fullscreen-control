@@ -4,9 +4,10 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Fullscreen Control Web Component Demo</title>
+		<link rel="stylesheet" href="./demo-shell.css" />
 		<link rel="stylesheet" href="./styles.css" />
 	</head>
-	<body data-syntax-theme="github">
+	<body data-demo-page="full" data-syntax-theme="github">
 		<a class="skip-link" href="#main">Skip to examples</a>
 		<header>
 			<p class="eyebrow">Small component. More room.</p>
@@ -43,6 +44,9 @@
 					id="microlighter-status"
 					class="enhancement-status"
 					role="status"
+					data-loading-message="Loading optional code highlighting and Copy controls."
+					data-failure-message="MicroLighter could not load. Code remains readable and selectable; the component loads independently."
+					data-theme-failure-message="Code highlighting and Copy controls are available, but the syntax theme could not load. The component loads independently."
 					hidden
 				></p>
 				<noscript
@@ -69,17 +73,17 @@
 						<pre
 							tabindex="0"
 							aria-label="Video example code"
-						><code>&lt;fullscreen-control&gt;
+						><code><mark>&lt;fullscreen-control&gt;</mark>
   &lt;video src="./sample.mp4" controls
     width="320" height="180"
     aria-label="Moving circle"&gt;
     &lt;a href="./sample.mp4"&gt;Open the sample clip&lt;/a&gt;
   &lt;/video&gt;
-&lt;/fullscreen-control&gt;
+<mark>&lt;/fullscreen-control&gt;</mark>
 &lt;p&gt;Silent clip: a circle moves left to right
   across a rectangle; no audio.&lt;/p&gt;</code></pre>
 					</micro-lighter>
-					<div class="demo">
+					<div class="demo" data-demo-label="Live example">
 						<fullscreen-control>
 							<video
 								src="./sample.mp4"
@@ -118,15 +122,15 @@
 						<pre
 							tabindex="0"
 							aria-label="Iframe example code"
-						><code>&lt;fullscreen-control id="iframe-demo"&gt;
+						><code><mark>&lt;fullscreen-control id="iframe-demo"&gt;</mark>
   &lt;iframe src="./frame.html"
     title="Product presentation"
     width="320" height="180"
     allow="fullscreen" allowfullscreen&gt;&lt;/iframe&gt;
-&lt;/fullscreen-control&gt;
+<mark>&lt;/fullscreen-control&gt;</mark>
 &lt;a href="./frame.html"&gt;Read the presentation&lt;/a&gt;</code></pre>
 					</micro-lighter>
-					<div class="demo">
+					<div class="demo" data-demo-label="Live example">
 						<fullscreen-control id="iframe-demo">
 							<iframe
 								src="./frame.html"
@@ -161,13 +165,13 @@
 						<pre
 							tabindex="0"
 							aria-label="Japanese example code"
-						><code>&lt;fullscreen-control lang="ja"
-  button-text="全画面表示"&gt;
+						><code><mark>&lt;fullscreen-control lang="ja"
+  button-text="全画面表示"&gt;</mark>
   &lt;video src="./sample.mp4" controls
     aria-label="円の動き"&gt;&lt;/video&gt;
-&lt;/fullscreen-control&gt;</code></pre>
+<mark>&lt;/fullscreen-control&gt;</mark></code></pre>
 					</micro-lighter>
-					<div class="demo">
+					<div class="demo" data-demo-label="Live example">
 						<fullscreen-control lang="ja" button-text="全画面表示">
 							<video
 								src="./sample.mp4"
@@ -206,13 +210,13 @@
 						<pre
 							tabindex="0"
 							aria-label="Named media example code"
-						><code>&lt;fullscreen-control
-  button-text="View {name} fullscreen"&gt;
+						><code><mark>&lt;fullscreen-control
+  button-text="View {name} fullscreen"&gt;</mark>
   &lt;video src="./sample.mp4" controls
     aria-label="Moving circle"&gt;&lt;/video&gt;
-&lt;/fullscreen-control&gt;</code></pre>
+<mark>&lt;/fullscreen-control&gt;</mark></code></pre>
 					</micro-lighter>
-					<div class="demo">
+					<div class="demo" data-demo-label="Live example">
 						<fullscreen-control
 							id="named-demo"
 							button-text="View {name} fullscreen"
@@ -254,13 +258,13 @@
 							tabindex="0"
 							aria-label="Icon-only button example code"
 						><code>&lt;div class="demo"&gt;
-&lt;fullscreen-control class="icon-only"
+<mark>&lt;fullscreen-control class="icon-only"
   button-text="⤢"
-  button-label="View {name} fullscreen"&gt;
+  button-label="View {name} fullscreen"&gt;</mark>
   &lt;video src="./sample.mp4" controls
     width="320" height="180"
     aria-label="Moving circle"&gt;&lt;/video&gt;
-&lt;/fullscreen-control&gt;
+<mark>&lt;/fullscreen-control&gt;</mark>
 &lt;/div&gt;
 
 &lt;style&gt;
@@ -272,7 +276,7 @@
 }
 &lt;/style&gt;</code></pre>
 					</micro-lighter>
-					<div class="demo">
+					<div class="demo" data-demo-label="Live example">
 						<fullscreen-control
 							class="icon-only"
 							button-text="⤢"
@@ -331,10 +335,10 @@
   href="https://cdn.jsdelivr.net/npm/microlighter@2.2.0/dist/themes/github.css"&gt;
 &lt;script type="module"
   src="https://cdn.jsdelivr.net/npm/microlighter@2.2.0/dist/micro-lighter-element.min.js"&gt;&lt;/script&gt;
-&lt;script type="module" src="../define.js"&gt;&lt;/script&gt;
+<mark>&lt;script type="module" src="../define.js"&gt;&lt;/script&gt;</mark>
 
-&lt;fullscreen-control target="self"
-  aria-label="Greeting example"&gt;
+<mark>&lt;fullscreen-control target="self"
+  aria-label="Greeting example"&gt;</mark>
   &lt;micro-lighter language="javascript"
     controls="copy" line-numbers
     data-syntax-theme="github"&gt;
@@ -344,9 +348,9 @@
 
 console.log(greet("world"));&lt;/code&gt;&lt;/pre&gt;
   &lt;/micro-lighter&gt;
-&lt;/fullscreen-control&gt;</code></pre>
+<mark>&lt;/fullscreen-control&gt;</mark></code></pre>
 					</micro-lighter>
-					<div class="demo">
+					<div class="demo" data-demo-label="Live example">
 						<fullscreen-control
 							id="code-demo"
 							target="self"
@@ -406,10 +410,10 @@ console.log(greet("world"));</code></pre>
 						<pre
 							tabindex="0"
 							aria-label="Event example code"
-						><code>&lt;fullscreen-control id="event-demo"&gt;
+						><code><mark>&lt;fullscreen-control id="event-demo"&gt;</mark>
   &lt;video src="./sample.mp4" controls
     aria-label="Moving circle"&gt;&lt;/video&gt;
-&lt;/fullscreen-control&gt;
+<mark>&lt;/fullscreen-control&gt;</mark>
 &lt;script&gt;
   const media = document.querySelector('#event-demo');
   media.addEventListener('fullscreen-control:enter',
@@ -418,7 +422,7 @@ console.log(greet("world"));</code></pre>
     () =&gt; console.log('Exited fullscreen'));
 &lt;/script&gt;</code></pre>
 					</micro-lighter>
-					<div class="demo">
+					<div class="demo" data-demo-label="Live example">
 						<fullscreen-control id="event-demo">
 							<video
 								src="./sample.mp4"
@@ -469,7 +473,7 @@ console.log(greet("world"));</code></pre>
   background: #8d2828;
 }</code></pre>
 					</micro-lighter>
-					<div class="demo">
+					<div class="demo" data-demo-label="Live example">
 						<fullscreen-control class="custom-style">
 							<video
 								src="./sample.mp4"
@@ -541,7 +545,7 @@ console.log(greet("world"));</code></pre>
 			</p>
 		</footer>
 		<script src="../define.js" type="module"></script>
-		<script type="module" src="./demo.js"></script>
+		<script type="module" src="./code-examples.js"></script>
 		<script type="module">
 			const eventDemo = document.getElementById('event-demo');
 			const eventLogContent =

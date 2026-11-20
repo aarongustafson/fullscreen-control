@@ -1,0 +1,6 @@
+{
+	"index.html": "full",
+	"esm.html": "full",
+	"unpkg.html": "full",
+	"frame.html": "embedded"
+}

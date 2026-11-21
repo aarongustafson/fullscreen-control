@@ -3,6 +3,12 @@ import { it, expect } from 'vitest';
 
 const read = (path) => readFile(new URL(path, import.meta.url), 'utf8');
 
+it('trims block-edge margins inside demo sections', async () => {
+	expect(await read('../demo/demo-shell.css')).toMatch(
+		/\.demo-section(?:,\s*\.api-reference)?\s*\{[^}]*\bmargin-trim:\s*block;/,
+	);
+});
+
 it('documents replacement-string name substitution and null event payloads', async () => {
 	const readme = await read('../README.md');
 	expect(readme).toContain('replacement string');

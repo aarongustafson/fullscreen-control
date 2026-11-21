@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { test, expect } from '@playwright/test';
+import { readDemoStyles, serveDemo } from './demo-fixture.js';
 
 const read = (path) =>
 	readFile(new URL(`../../${path}`, import.meta.url), 'utf8');
@@ -394,7 +395,7 @@ test('all study palettes retain text and necessary button-boundary contrast', as
 	page,
 }) => {
 	test.setTimeout(120000);
-	const css = await read('demo/styles.css');
+	const css = await readDemoStyles();
 	await demo(page);
 	const style = await page.addStyleTag({ content: css });
 	const frameStyle = page
@@ -963,3 +964,69 @@ for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
 		});
 	}
 }
+
+test('loaded syntax styles respect distinct high-contrast field surfaces and inherited scheme', async ({
+	page,
+}) => {
+	await serveDemo(page, { distinctFields: true });
+	await page.emulateMedia({ contrast: 'more', colorScheme: 'dark' });
+	await page.goto('http://code-demo.test/demo/index.html');
+	await expect(page.locator('#microlighter-status')).toBeHidden();
+	await expect(page.locator('link[data-code-theme]')).toHaveAttribute(
+		'media',
+		'all',
+	);
+	const code = page.locator('micro-lighter pre').first();
+	await page
+		.locator('micro-lighter')
+		.first()
+		.evaluate((panel) => {
+			panel.classList.remove('code-panel');
+		});
+	await expect(page.locator('micro-lighter').first()).toHaveCSS(
+		'background-color',
+		'rgb(20, 30, 40)',
+	);
+	await expect(code).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+	await expect(code).toHaveCSS('color', 'rgb(255, 255, 0)');
+	await expect(code).toHaveCSS('--syntax-keyword', 'rgb(255, 255, 0)');
+	const greeting = page.locator('#code-demo micro-lighter');
+	await expect(greeting).toHaveCSS('display', 'grid');
+	await expect(greeting).toHaveCSS('background-color', 'rgb(20, 30, 40)');
+	await expect(greeting.locator('pre')).toHaveCSS(
+		'background-color',
+		'rgba(0, 0, 0, 0)',
+	);
+	await expect(greeting.locator('pre')).toHaveCSS(
+		'color',
+		'rgb(255, 255, 0)',
+	);
+	await page.addStyleTag({ content: ':root { color-scheme: light; }' });
+	for (const scope of await page.locator('[data-syntax-theme]').all()) {
+		await expect(scope).toHaveCSS('color-scheme', 'light');
+	}
+});
+
+test.describe('nested highlighter without JavaScript', () => {
+	test.use({ javaScriptEnabled: false });
+
+	test('keeps the greeting on one paired field surface without enhancement', async ({
+		page,
+	}) => {
+		await serveDemo(page, { distinctFields: true });
+		await page.emulateMedia({ contrast: 'more', colorScheme: 'dark' });
+		await page.goto('http://code-demo.test/demo/index.html');
+		const greeting = page.locator('#code-demo micro-lighter');
+		await expect(greeting).toHaveCSS('display', 'grid');
+		await expect(greeting).toHaveCSS('background-color', 'rgb(20, 30, 40)');
+		await expect(greeting).toHaveCSS('color', 'rgb(255, 255, 0)');
+		await expect(greeting.locator('pre')).toHaveCSS(
+			'background-color',
+			'rgba(0, 0, 0, 0)',
+		);
+		await expect(greeting.locator('pre')).toHaveCSS(
+			'color',
+			'rgb(255, 255, 0)',
+		);
+	});
+});

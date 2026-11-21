@@ -4,9 +4,10 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Fullscreen Control via unpkg</title>
+		<link rel="stylesheet" href="./demo-shell.css" />
 		<link rel="stylesheet" href="./styles.css" />
 	</head>
-	<body data-syntax-theme="github">
+	<body data-demo-page="full" data-syntax-theme="github">
 		<a class="skip-link" href="#main">Skip to example</a>
 		<header>
 			<p class="eyebrow">Fullscreen control / unpkg</p>
@@ -40,6 +41,9 @@
 				id="microlighter-status"
 				class="enhancement-status"
 				role="status"
+				data-loading-message="Loading optional code highlighting and Copy controls."
+				data-failure-message="MicroLighter could not load. Code remains readable and selectable; the component loads independently."
+				data-theme-failure-message="Code highlighting and Copy controls are available, but the syntax theme could not load. The component loads independently."
 				hidden
 			></p>
 			<noscript
@@ -60,15 +64,15 @@
 						<pre
 							tabindex="0"
 							aria-label="unpkg import example code"
-						><code>&lt;script type="module"&gt;
+						><code><mark>&lt;script type="module"&gt;
   import 'https://unpkg.com/@aarongustafson/fullscreen-control@latest/define.js?module';
-&lt;/script&gt;
-&lt;fullscreen-control button-text="Watch fullscreen"&gt;
+&lt;/script&gt;</mark>
+<mark>&lt;fullscreen-control button-text="Watch fullscreen"&gt;</mark>
   &lt;video src="./sample.mp4" controls
     aria-label="Moving circle"&gt;&lt;/video&gt;
-&lt;/fullscreen-control&gt;</code></pre>
+<mark>&lt;/fullscreen-control&gt;</mark></code></pre>
 					</micro-lighter>
-					<div class="demo">
+					<div class="demo" data-demo-label="Live example">
 						<fullscreen-control button-text="Watch fullscreen"
 							><video
 								src="./sample.mp4"
@@ -98,7 +102,7 @@
 				>.
 			</p>
 		</footer>
-		<script type="module" src="./demo.js"></script>
+		<script type="module" src="./code-examples.js"></script>
 		<script type="module">
 			import 'https://unpkg.com/@aarongustafson/fullscreen-control@latest/define.js?module';
 		</script>

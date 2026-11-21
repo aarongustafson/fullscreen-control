@@ -4,9 +4,10 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Fullscreen Control via esm.sh</title>
+		<link rel="stylesheet" href="./demo-shell.css" />
 		<link rel="stylesheet" href="./styles.css" />
 	</head>
-	<body data-syntax-theme="github">
+	<body data-demo-page="full" data-syntax-theme="github">
 		<a class="skip-link" href="#main">Skip to example</a>
 		<header>
 			<p class="eyebrow">Fullscreen control / esm.sh</p>
@@ -39,6 +40,9 @@
 				id="microlighter-status"
 				class="enhancement-status"
 				role="status"
+				data-loading-message="Loading optional code highlighting and Copy controls."
+				data-failure-message="MicroLighter could not load. Code remains readable and selectable; the component loads independently."
+				data-theme-failure-message="Code highlighting and Copy controls are available, but the syntax theme could not load. The component loads independently."
 				hidden
 			></p>
 			<noscript
@@ -60,20 +64,20 @@
 						<pre
 							tabindex="0"
 							aria-label="ESM import example code"
-						><code>&lt;script type="module"&gt;
+						><code><mark>&lt;script type="module"&gt;
   import { FullscreenControlElement } from
     'https://esm.sh/@aarongustafson/fullscreen-control@2.0.7/fullscreen-control.js?bundle&amp;target=es2022';
   if (!customElements.get('fullscreen-control')) {
     customElements.define('fullscreen-control',
       FullscreenControlElement);
   }
-&lt;/script&gt;
-&lt;fullscreen-control&gt;
+&lt;/script&gt;</mark>
+<mark>&lt;fullscreen-control&gt;</mark>
   &lt;video src="./sample.mp4" controls
     aria-label="Moving circle"&gt;&lt;/video&gt;
-&lt;/fullscreen-control&gt;</code></pre>
+<mark>&lt;/fullscreen-control&gt;</mark></code></pre>
 					</micro-lighter>
-					<div class="demo">
+					<div class="demo" data-demo-label="Live example">
 						<fullscreen-control
 							><video
 								src="./sample.mp4"
@@ -103,7 +107,7 @@
 				>.
 			</p>
 		</footer>
-		<script type="module" src="./demo.js"></script>
+		<script type="module" src="./code-examples.js"></script>
 		<script type="module">
 			import { FullscreenControlElement } from 'https://esm.sh/@aarongustafson/fullscreen-control@2.0.7/fullscreen-control.js?bundle&target=es2022';
 			if (!customElements.get('fullscreen-control')) {

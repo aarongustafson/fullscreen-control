@@ -405,7 +405,9 @@ generated silent clip, with a visible description of its complete content.
 Playback needs H.264/MP4 support; use the local text presentation if the clip cannot
 play in your browser.
 To regenerate it with the installed Chromium engine, run
-`node scripts/create-demo-video.js`. It contains no third-party footage.
+`node scripts/create-demo-video.js`. The script aligns the recorded MP4’s
+media duration with its encoded frames so native players can reach the end.
+It contains no third-party footage.
 The text presentation is also local. CDN examples still require their named
 CDN in normal use; tests intercept those modules with the checked-out source.
 

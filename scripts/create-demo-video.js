@@ -1,6 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
+import { normalizeDemoVideo } from './normalize-demo-video.js';
 
 const browser = await chromium.launch();
 try {
@@ -63,7 +64,7 @@ try {
 	await context.close();
 	await writeFile(
 		fileURLToPath(new URL('../demo/sample.mp4', import.meta.url)),
-		Buffer.from(bytes),
+		normalizeDemoVideo(Buffer.from(bytes)),
 	);
 } finally {
 	await browser.close();

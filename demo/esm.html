@@ -11,7 +11,7 @@
 		<a class="skip-link" href="#main">Skip to example</a>
 		<header>
 			<p class="eyebrow">Fullscreen control / esm.sh</p>
-			<h1>Import. Register. Expand.</h1>
+			<h1>&lt;fullscreen-control&gt; via esm.sh</h1>
 			<p>
 				Import the class and register it once. See the
 				<a
@@ -51,7 +51,7 @@
 					clip directly.
 				</p></noscript
 			>
-			<section class="demo-section">
+			<section class="demo-section" id="class-import">
 				<h2>Class-only import</h2>
 				<div class="code-demo-pair">
 					<micro-lighter
@@ -74,8 +74,12 @@
 &lt;/script&gt;</mark>
 <mark>&lt;fullscreen-control&gt;</mark>
   &lt;video src="./sample.mp4" controls
+    preload="metadata" width="320" height="180"
     aria-label="Moving circle"&gt;&lt;/video&gt;
-<mark>&lt;/fullscreen-control&gt;</mark></code></pre>
+<mark>&lt;/fullscreen-control&gt;</mark>
+&lt;p&gt;Silent clip: a circle moves left to right
+  across a rectangle; no audio.
+  &lt;a href="./sample.mp4"&gt;Open the sample clip&lt;/a&gt;.&lt;/p&gt;</code></pre>
 					</micro-lighter>
 					<div class="demo" data-demo-label="Live example">
 						<fullscreen-control

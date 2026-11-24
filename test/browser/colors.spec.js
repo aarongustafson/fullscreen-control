@@ -155,6 +155,142 @@ async function demo(page, name = 'index.html') {
 	).toBeVisible();
 }
 
+for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
+	test(`${name}: individual example fragments reach visible headings at narrow widths`, async ({
+		page,
+	}) => {
+		await demo(page, name);
+		await page.setViewportSize({ width: 320, height: 900 });
+		const destinations = await page
+			.locator('.code-demo-pair')
+			.evaluateAll((pairs) => pairs.map((pair) => pair.parentElement.id));
+		for (const id of destinations) {
+			expect(id).not.toBe('');
+			await page.evaluate((id) => {
+				location.hash = id;
+			}, id);
+			const block = page.locator(`#${id}`);
+			await expect(
+				block.locator(':scope > h2, :scope > h3'),
+			).toBeInViewport();
+			await expect(
+				block.locator(':scope > .code-demo-pair > .demo'),
+			).toBeVisible();
+		}
+	});
+}
+
+test('plain-content wrapper keeps keyboard access and returns focus after native fullscreen', async ({
+	page,
+	browserName,
+}) => {
+	await demo(page);
+	test.skip(
+		!(await page.evaluate(() => document.fullscreenEnabled)),
+		'Native Fullscreen API unavailable in this browser configuration.',
+	);
+	const host = page.locator('#content-demo');
+	const button = host.locator(':scope > button');
+	await button.focus();
+	await page.keyboard.press('Enter');
+	await expect
+		.poll(() => page.evaluate(() => document.fullscreenElement?.id))
+		.toBe('content-demo');
+	await expect(button).toHaveAccessibleName('Exit fullscreen');
+	await expect(button).toBeFocused();
+	await page.keyboard.press(
+		browserName === 'webkit' ? 'Alt+Shift+Tab' : 'Shift+Tab',
+	);
+	await expect(host.getByRole('link')).toBeFocused();
+	await page.keyboard.press('Escape');
+	await expect
+		.poll(() => page.evaluate(() => document.fullscreenElement === null))
+		.toBe(true);
+	await expect(button).toHaveAccessibleName('View fullscreen');
+	await expect(button).toBeFocused();
+});
+
+test('Japanese wrapper uses authored names and literal recovery feedback without replacing content', async ({
+	page,
+}) => {
+	await demo(page);
+	const host = page.locator('#japanese-content-demo');
+	const button = host.locator(':scope > button');
+	await expect(button).toHaveAccessibleName('製品の紹介を全画面表示');
+	await expect(host).toHaveAttribute('lang', 'ja');
+	const text = await host.locator('h4').textContent();
+	await host.evaluate((host) => {
+		host.requestFullscreen = () =>
+			Promise.reject(new DOMException('Denied', 'NotAllowedError'));
+	});
+	await button.focus();
+	await page.keyboard.press('Enter');
+	await expect(host.getByRole('status')).toHaveText(
+		await host.getAttribute('error-text'),
+	);
+	await expect(button).toBeEnabled();
+	await expect(button).toBeFocused();
+	await expect(host.locator('h4')).toHaveText(text);
+	await expect(host.getByRole('link')).toBeVisible();
+});
+
+test('Japanese wrapper changes its visible action on observed native fullscreen transitions', async ({
+	page,
+}) => {
+	await demo(page);
+	test.skip(
+		!(await page.evaluate(() => document.fullscreenEnabled)),
+		'Native Fullscreen API unavailable in this browser configuration.',
+	);
+	const host = page.locator('#japanese-content-demo');
+	const button = host.locator(':scope > button');
+	await button.focus();
+	await page.keyboard.press('Enter');
+	await expect
+		.poll(() => page.evaluate(() => document.fullscreenElement?.id))
+		.toBe('japanese-content-demo');
+	await expect(button).toHaveAccessibleName('全画面表示を終了');
+	await expect(button).toBeFocused();
+	await button.press('Enter');
+	await expect
+		.poll(() => page.evaluate(() => document.fullscreenElement === null))
+		.toBe(true);
+	await expect(button).toHaveAccessibleName('製品の紹介を全画面表示');
+	await expect(button).toBeFocused();
+	await expect(host.getByRole('status')).toBeEmpty();
+});
+
+test('media entry failure retains native controls and a direct link without claiming a transition', async ({
+	page,
+}) => {
+	await demo(page);
+	const host = page.locator('#native-video fullscreen-control');
+	await host.evaluate((host) => {
+		host.dataset.entered = 'false';
+		host.addEventListener('fullscreen-control:enter', () => {
+			host.dataset.entered = 'true';
+		});
+		host.querySelector('video').requestFullscreen = () =>
+			Promise.reject(new DOMException('Denied', 'NotAllowedError'));
+	});
+	const failure = page.waitForEvent(
+		'console',
+		(message) =>
+			message.type() === 'error' &&
+			message.text().includes('Error entering fullscreen'),
+	);
+	const button = host.locator(':scope > button');
+	await button.focus();
+	await page.keyboard.press('Enter');
+	await failure;
+	await expect(button).toBeEnabled();
+	await expect(button).toBeFocused();
+	await expect(host.locator('video')).toHaveAttribute('controls', '');
+	await expect(host.getByRole('status')).toHaveCount(0);
+	await expect(host).toHaveAttribute('data-entered', 'false');
+	await expect(page.locator('#native-video .demo > p a')).toBeVisible();
+});
+
 test('MicroLighter copy and highlighting survive keyboard-operated wrapper fullscreen', async ({
 	page,
 	browserName,
@@ -579,7 +715,7 @@ test('labels, associations, HTML-safe content, and lifecycle cleanup remain nati
 	await expect(button).toHaveText('View <em>New name</em> fullscreen');
 	await expect(button.locator('em')).toHaveCount(0);
 	await expect(
-		page.locator('fullscreen-control[lang="ja"] button'),
+		page.locator('#japanese-video fullscreen-control button'),
 	).toHaveAccessibleName('全画面表示');
 	expect(
 		await button.evaluate(
@@ -875,9 +1011,11 @@ for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
 				await button.scrollIntoViewIfNeeded();
 				const geometry = await button.evaluate((button) => {
 					const box = button.getBoundingClientRect();
-					const media = button.parentElement
-						.querySelector('video, iframe, micro-lighter')
-						.getBoundingClientRect();
+					const content =
+						button.parentElement.querySelector(
+							'video, iframe, micro-lighter',
+						) || button.previousElementSibling;
+					const media = content.getBoundingClientRect();
 					return {
 						isWrapper:
 							button.parentElement.getAttribute('target') ===

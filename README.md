@@ -9,7 +9,7 @@
 Adds a fullscreen button to the first video or iframe inside a light-DOM custom
 element. By default, the media itself enters fullscreen; the host and button do not.
 Set `target="self"` to fullscreen the wrapper and all its contents instead,
-including code examples and their controls.
+including text, links, and other controls.
 Author native media controls and useful links so the content remains usable
 before JavaScript loads or when fullscreen is unavailable.
 
@@ -18,23 +18,6 @@ before JavaScript loads or when fullscreen is unavailable.
 - [Full examples](https://aarongustafson.github.io/fullscreen-control/demo/) ([source](./demo/index.html))
 - [esm.sh class import](https://aarongustafson.github.io/fullscreen-control/demo/esm) ([source](./demo/esm.html))
 - [unpkg automatic registration](https://aarongustafson.github.io/fullscreen-control/demo/unpkg) ([source](./demo/unpkg.html))
-
-The main and CDN pages are a demo-design pilot. Every displayed code block uses
-MicroLighter 2.2.0 for Copy, with line numbers on longer snippets. The demos
-follow the system light/dark preference, keep code/live pairs side by side
-when space allows, and stack them on narrow screens. A skip link leads to the
-examples. Plain code and native media remain usable without JavaScript or the CDN.
-
-MicroLighter 2.2.0 only syntax-colors code with a single text node. Displayed
-snippets therefore use plain text without `<mark>` wrappers, allowing HTML,
-CSS, and JavaScript syntax coloring without changing copied text.
-
-Copy uses MicroLighter’s English labels and clipboard behavior. Version 2.2.0
-doesn’t render a clipboard-rejection message or provide a localization API.
-The pages keep manual selection/copy guidance visible or in the main page’s
-“Code controls, highlighting, and fallbacks” disclosure. They don’t query
-permissions or read the clipboard. Test clipboard policies and assistive
-technology feedback in the target browsers before adopting this pattern.
 
 ## Installation and registration
 
@@ -70,7 +53,7 @@ imports safe in a DOM-free server process.
 ## Basic use and fallback
 
 ```html
-<fullscreen-control button-text="View {name} fullscreen">
+<fullscreen-control>
   <video src="video.webm" controls aria-label="Product demonstration">
     <track kind="captions" src="captions.vtt" srclang="en" label="English" />
     <a href="video.webm">Open the video</a>
@@ -142,26 +125,6 @@ When providing a distinct `button-label`, include the visible wording in that
 name so speech-input users can refer to what they see. Localize the media’s name,
 fallback instructions, captions, and descriptions too.
 
-### Icon-only buttons
-
-Give an icon-only button an authored accessible name. For example, a diagonal
-two-headed arrow can represent fullscreen without becoming the button’s
-screen-reader name:
-
-```html
-<fullscreen-control
-  class="icon-only"
-  button-text="⤢"
-  button-label="View {name} fullscreen"
->
-  <video src="video.webm" controls aria-label="Product demonstration"></video>
-</fullscreen-control>
-```
-
-Translate `button-label` and the media name for the content language. Keep a
-visible explanation of the icon’s purpose nearby. The demo gives this button a
-minimum 44px target and retains its native focus indicator.
-
 ## Fullscreen a wrapper
 
 Use `target="self"` to keep content and its controls together in fullscreen.
@@ -171,15 +134,14 @@ region without moving, cloning, or replacing authored content.
 ```html
 <fullscreen-control
   target="self"
-  aria-label="Greeting example"
+  aria-label="Product presentation"
   button-text="View fullscreen"
   exit-text="Exit fullscreen"
-  error-text="Fullscreen is unavailable. You can still read and copy this code."
+  error-text="Fullscreen is unavailable. You can still read the presentation here."
 >
-  <pre
-    tabindex="0"
-    aria-label="Greeting code"
-  ><code>console.log("Hello");</code></pre>
+  <h2>Product presentation</h2>
+  <p>Keep the presentation and its links together.</p>
+  <a href="presentation.html">Read the full presentation</a>
 </fullscreen-control>
 ```
 
@@ -190,11 +152,16 @@ while fullscreen entry is pending or fullscreen is active is deferred so it
 doesn’t remove the Exit button. It takes effect after entry fails or fullscreen
 exits.
 
+Media mode without a video or iframe logs a warning and adds no button.
+Inserting a media element as a direct child, or a wrapper containing media,
+lets the component initialize again. Native content remains usable while it
+waits for a target.
+
 In self mode, the button changes to the exit wording on an observed fullscreen
 transition. Entry from the button focuses that same button inside fullscreen;
 exit returns focus to it. Native Tab navigation still reaches the content and
 its controls. Programmatic entry doesn’t move focus. Author a name for the
-wrapper and make overflowing code keyboard-scrollable, as in the example.
+wrapper and make overflowing code keyboard-scrollable when including code.
 Keyboard navigation follows browser preferences; Safari may require Option-Tab
 to reach buttons when full keyboard navigation is off.
 
@@ -228,8 +195,7 @@ Load MicroLighter’s element module and theme separately, following its
 installation instructions. It isn’t a runtime dependency of this package.
 The [main demo](https://aarongustafson.github.io/fullscreen-control/demo/#microlighter-example)
 loads version 2.2.0 from jsDelivr and includes loading and failure messages.
-It preserves the original light-DOM code and its text nodes, so CSS Custom
-Highlight ranges survive entry and exit. MicroLighter uses its own shadow root
+MicroLighter uses its own shadow root
 for controls; `fullscreen-control` remains light DOM and doesn’t style those controls.
 Style them through MicroLighter’s documented parts.
 
@@ -289,68 +255,18 @@ Canvas/CanvasText surface.
 | `--fullscreen-control-button-inset-block-start` | `0.5rem` | Block-start offset for the overlay. |
 | `--fullscreen-control-button-inset-inline-end`  | `0.5rem` | Inline-end offset for the overlay.  |
 
-Keep the button overlaid while allowing room for long labels and enlarged
-text. The demos place media and button in the same grid cell, leaving a clear
-strip for native playback controls. The media area grows when the label needs
-more height; the button does not move below it. The positioning hooks still
-control its offsets. For example, wrap the component in an element with
-`class="media-example"`:
+Leave room for long labels, enlarged text, and native playback controls.
+The [demo styles](./demo/styles.css) keep the media and overlay in one grid
+cell, allowing the media area to grow with the button label.
+See the [icon example](https://aarongustafson.github.io/fullscreen-control/demo/#icon-button)
+and [color example](https://aarongustafson.github.io/fullscreen-control/demo/#custom-colors)
+for optional styling. Give icon-only buttons an authored, translated
+`button-label` and a visible explanation nearby.
 
-```css
-.media-example fullscreen-control {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.media-example video,
-.media-example iframe {
-  grid-area: 1 / 1;
-  inline-size: 100%;
-  block-size: 100%;
-  aspect-ratio: 16 / 9;
-}
-
-.media-example fullscreen-control > button {
-  position: static;
-  grid-area: 1 / 1;
-  place-self: start end;
-  max-inline-size: calc(
-    100% - var(--fullscreen-control-button-inset-inline-end, 0.5rem) - 0.5rem
-  );
-  min-block-size: 2.75rem;
-  margin-block-start: var(
-    --fullscreen-control-button-inset-block-start,
-    0.5rem
-  );
-  margin-inline-end: var(--fullscreen-control-button-inset-inline-end, 0.5rem);
-  margin-block-end: 3rem;
-  padding: 0.5rem 1rem;
-  font: inherit;
-  overflow-wrap: anywhere;
-  border: 1px solid currentColor;
-  background-color: Canvas;
-  background-image: linear-gradient(ButtonFace, ButtonFace);
-  color: ButtonText;
-}
-
-.media-example .icon-only > button {
-  inline-size: 2.75rem;
-  padding: 0.25rem;
-  font-size: 1.75rem;
-  line-height: 1;
-}
-```
-
-The Canvas backing keeps translucent button surfaces opaque over media.
-Keep foreground/background pairs together and check text and boundaries for
-custom themes, including hover. Avoid opacity-based dimming and blanket
-`forced-color-adjust: none`. The demos retain native focus, use foreground
-boundaries, and provide an opt-in red theme with a matching white foreground.
-Their prose uses Canvas/CanvasText; code uses MicroLighter’s paired GitHub theme
-colors, while event output uses Canvas-backed Field/FieldText.
-The decorative grid disappears with increased contrast or forced colors.
-Only the Canvas-backed footer uses an 80% foreground mix;
-increased contrast and forced colors restore the full foreground.
+Keep foreground/background pairs together, including hover, and retain the
+native focus indicator. Avoid opacity-based dimming and blanket
+`forced-color-adjust: none`. Check text contrast and button boundaries over
+the media, not just against the page background.
 
 The button gets `aria-controls`, using an existing target ID or generating one.
 Name and ID attribute changes update its label and association. Activation
@@ -364,8 +280,8 @@ The component adds `role="group"` only when the author did not provide a role.
 Initialization is scheduled for an animation frame, with a timer fallback.
 Direct-child media or wrapper insertion/removal rebuilds the enhancement;
 changes inside an unchanged nested wrapper are not watched for media replacement.
-In self mode, descendant changes do not rebuild the enhancement or touch code
-nodes, highlighting ranges, or nested controls. Label changes update the button
+In self mode, descendant changes do not rebuild the enhancement or replace
+authored content and nested controls. Label changes update the button
 without rebuilding it.
 
 Disconnecting cancels scheduled work, removes the button, status region, and listeners,
@@ -374,7 +290,12 @@ not remove the shared style element or restore generated IDs, roles, video
 controls, or iframe permission attributes. Rebuilding can replace a focused
 button; manage focus when changing the media structure.
 
-This component needs Custom Elements, ES modules, and a supported Fullscreen API.
+This component needs Custom Elements, ES modules, and a supported
+[Fullscreen API](https://developer.mozilla.org/en-US/docs/Web/API/Fullscreen_API).
+Entry normally needs a user gesture. A document’s
+[Permissions Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/fullscreen)
+can deny fullscreen, including within an iframe; permission attributes cannot
+override that restriction.
 It uses light DOM, not Shadow DOM. Platform video fullscreen, embedded-content
 policies, and mobile browser behavior differ; older engines may need polyfills
 or may only offer their native media controls.

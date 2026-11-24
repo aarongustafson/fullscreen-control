@@ -355,6 +355,7 @@ test('MicroLighter copy and highlighting survive keyboard-operated wrapper fulls
 		await expect
 			.poll(() => page.evaluate(() => document.fullscreenElement?.id))
 			.toBe('code-demo');
+		await expect(button).toHaveAccessibleName('Exit fullscreen');
 		await page.keyboard.press('Escape');
 		await expect
 			.poll(() =>
